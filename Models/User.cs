@@ -4,11 +4,10 @@ namespace KanbanBoard.Models
 {
     public class User
     {
-        public User() { DateOfRegistration = DateTime.UtcNow; }
-
-        [Key] public int UserId { get; set; }
-        public string Login { get; set; }
-        public string Password { get; set; }
+        [Key] 
+        public int UserId { get; set; }
+        public string Login { get; set; } = null!;
+        public string PasswordHash { get; set; } = null!;
         public DateTime DateOfRegistration { get; set; }
 
         public ICollection<BoardUser> BoardUsers { get; set; } = new List<BoardUser>();

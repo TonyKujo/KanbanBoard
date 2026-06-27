@@ -24,7 +24,7 @@ namespace KanbanBoard.Services
                 User User = new User();
                 User.Login = login;
                 string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-                User.Password = passwordHash;
+                User.PasswordHash = passwordHash;
                 _db.Users.Add(User);
                 _db.SaveChanges();
             }
@@ -32,7 +32,7 @@ namespace KanbanBoard.Services
         }
         public async Task Login(string login, string password, HttpContext httpContext) {
             var UserFromDb = _db.Users.FirstOrDefault(u => u.Login == login);
-            if (UserFromDb == null || !BCrypt.Net.BCrypt.Verify(password, UserFromDb.Password)) {
+            if (UserFromDb == null || !BCrypt.Net.BCrypt.Verify(password, UserFromDb.PasswordHash)) {
                 throw new InvalidOperationException("Неверный логин или пароль!");
                 
             }
