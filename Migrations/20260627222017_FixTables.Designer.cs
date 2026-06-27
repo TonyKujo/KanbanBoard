@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KanbanBoard.Migrations
 {
     [DbContext(typeof(KanbanBoardDbContext))]
-    [Migration("20260627221720_FixTables")]
+    [Migration("20260627222017_FixTables")]
     partial class FixTables
     {
         /// <inheritdoc />
@@ -84,8 +84,8 @@ namespace KanbanBoard.Migrations
 
                     b.Property<string>("NameOfBoard")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("BoardId");
 

@@ -81,8 +81,8 @@ namespace KanbanBoard.Migrations
 
                     b.Property<string>("NameOfBoard")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("BoardId");
 

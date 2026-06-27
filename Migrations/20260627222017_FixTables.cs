@@ -90,8 +90,8 @@ namespace KanbanBoard.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "NameOfBoard",
                 table: "Boards",
-                type: "character varying(20)",
-                maxLength: 20,
+                type: "character varying(200)",
+                maxLength: 200,
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -216,8 +216,8 @@ namespace KanbanBoard.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "character varying(20)",
-                oldMaxLength: 20);
+                oldType: "character varying(200)",
+                oldMaxLength: 200);
 
             migrationBuilder.AlterColumn<string>(
                 name: "Description",
