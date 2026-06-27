@@ -11,7 +11,11 @@ namespace KanbanBoard.Models
         public string? TaskDescription { get; set; }
         public int? AssigneeId { get; set; }
         public int AuthorId { get; set; }
+
+        [ForeignKey("Status")]
         public int StatusId { get; set; }
+
+        [ForeignKey("Board")]
         public int BoardId { get; set; }
         public DateTime CreationDate { get; set; }
         public DateTime DeadLine { get; set; }
@@ -20,14 +24,16 @@ namespace KanbanBoard.Models
 
         public BoardUser Assignee { get; set; } = null!;
 
-        [ForeignKey("BoardId")] 
+        
         public Board Board { get; set; } = null!;
 
-        [ForeignKey("StatusId")] 
         public Status Status { get; set; } = null!;
 
+        [InverseProperty("Task")]
         public ICollection<Comment> Comments {  get; set; } = new List<Comment> ();
+        [InverseProperty("Task")]
         public ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
+        [InverseProperty("Task")]
         public ICollection<TaskStatusHistory> TaskStatusHistories { get; set; } = new List<TaskStatusHistory>();
     }
 }

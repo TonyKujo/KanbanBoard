@@ -8,12 +8,14 @@ namespace KanbanBoard.Models
         [Key] 
         public int StatusId { get; set; }
         public string StatusName { get; set; } = null!;
+        [ForeignKey("Board")]
         public int BoardId { get; set; }
 
 
-        [ForeignKey("BoardId")] 
         public Board Board { get; set; } = null!;
+        [InverseProperty("Status")]
         public ICollection<Task> Tasks { get; set; } = new List<Task>();
+        [InverseProperty("Status")]
         public ICollection<TaskStatusHistory> TaskStatusHistories { get; set; } = new List<TaskStatusHistory>();
     }
 }

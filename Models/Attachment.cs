@@ -7,16 +7,19 @@ namespace KanbanBoard.Models
     {
         [Key] 
         public int AttachmentId { get; set; }
+
+        [ForeignKey("Task")]
         public int? TaskId { get; set; }
+
+        [ForeignKey("Comment")]
+
         public int? CommentId { get; set; }
         public string FileName { get; set; } = null!;
         public string FilePath { get; set; } = null!;
         public DateTime DateOfUpload { get; set; }
 
-        [ForeignKey("TaskId")] 
-        public Task? Task { get; set; }
 
-        [ForeignKey("CommentId")] 
+        public Task? Task { get; set; }
         public Comment? Comment { get; set; }
     }
 }

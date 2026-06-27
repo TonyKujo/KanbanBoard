@@ -8,16 +8,18 @@ namespace KanbanBoard.Models
         [Key] 
         public int CommentId { get; set; }
         public string? Text { get; set; }
+        [ForeignKey("Author")]
         public int AuthorId { get; set; }
+        [ForeignKey("Task")]
         public int TaskId { get; set; }
         public bool IsEdited { get; set; }
         public DateTime DateOfMade { get; set; }
 
-        [ForeignKey("AuthorId")]
         public BoardUser Author { get; set; } = null!;
 
-        [ForeignKey("TaskId")]
         public Task Task { get; set; } = null!;
+
+        [InverseProperty("Comment")]
         public ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
 
     }

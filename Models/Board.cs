@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KanbanBoard.Models
 {
@@ -12,8 +13,14 @@ namespace KanbanBoard.Models
         public DateTime DateOfMade { get; set; }
 
         public User Author { get; set; } = null!;
+
+        [InverseProperty("Board")]
         public ICollection<Task> Tasks { get; set; } = new List<Task>();
+
+        [InverseProperty("Board")]
         public ICollection<BoardUser> BoardUsers { get; set; } = new List<BoardUser>();
+
+        [InverseProperty("Board")]
         public ICollection<Status> Statuses { get; set; } = new List<Status>();
     }
 }
