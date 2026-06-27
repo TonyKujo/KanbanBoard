@@ -163,8 +163,8 @@ namespace KanbanBoard.Migrations
 
                     b.Property<string>("StatusName")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("StatusId");
 

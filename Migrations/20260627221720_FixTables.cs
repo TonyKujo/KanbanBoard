@@ -65,8 +65,8 @@ namespace KanbanBoard.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "StatusName",
                 table: "Statuses",
-                type: "character varying(10)",
-                maxLength: 10,
+                type: "character varying(100)",
+                maxLength: 100,
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "text");
@@ -196,8 +196,8 @@ namespace KanbanBoard.Migrations
                 type: "text",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "character varying(10)",
-                oldMaxLength: 10);
+                oldType: "character varying(100)",
+                oldMaxLength: 100);
 
             migrationBuilder.AlterColumn<string>(
                 name: "Text",

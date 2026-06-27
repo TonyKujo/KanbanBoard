@@ -7,7 +7,7 @@ namespace KanbanBoard.Models
     {
         [Key] 
         public int StatusId { get; set; }
-        [MaxLength(10)]
+        [MaxLength(100)]
         public string StatusName { get; set; } = null!;
         [ForeignKey("Board")]
         public int BoardId { get; set; }
