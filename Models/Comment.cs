@@ -7,6 +7,7 @@ namespace KanbanBoard.Models
     {
         [Key] 
         public int CommentId { get; set; }
+        [MaxLength(10000)]
         public string? Text { get; set; }
         [ForeignKey("Author")]
         public int AuthorId { get; set; }

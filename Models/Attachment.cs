@@ -14,7 +14,9 @@ namespace KanbanBoard.Models
         [ForeignKey("Comment")]
 
         public int? CommentId { get; set; }
+        [MaxLength(100)]
         public string FileName { get; set; } = null!;
+        [MaxLength(1024)]
         public string FilePath { get; set; } = null!;
         public DateTime DateOfUpload { get; set; }
 

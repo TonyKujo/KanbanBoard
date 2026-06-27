@@ -7,7 +7,9 @@ namespace KanbanBoard.Models
     {
         [Key] 
         public int BoardId { get; set; }
+        [MaxLength(20)]
         public string NameOfBoard { get; set; } = null!;
+        [MaxLength(3000)]
         public string? Description { get; set; }
         public int AuthorId { get; set; }
         public DateTime DateOfMade { get; set; }

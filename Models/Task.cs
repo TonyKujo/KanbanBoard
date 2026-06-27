@@ -7,7 +7,9 @@ namespace KanbanBoard.Models
     {
         [Key]
         public int TaskId { get; set; }
+        [MaxLength(50)]
         public string TaskName { get; set; } = null!;
+        [MaxLength(3000)]
         public string? TaskDescription { get; set; }
         public int? AssigneeId { get; set; }
         public int AuthorId { get; set; }
