@@ -5,17 +5,22 @@ namespace KanbanBoard.Models
 {
     public class Comment
     {
-        public Comment () { DateOfMade = DateTime.UtcNow; }
-        [Key] public int CommentId { get; set; }
-        public string Text { get; set; }
+        [Key] 
+        public int CommentId { get; set; }
+        [MaxLength(10000)]
+        public string? Text { get; set; }
+        [ForeignKey("Author")]
         public int AuthorId { get; set; }
+        [ForeignKey("Task")]
         public int TaskId { get; set; }
+        public bool IsEdited { get; set; }
         public DateTime DateOfMade { get; set; }
 
-        [ForeignKey("AuthorId")]
-        public BoardUser Author { get; set; }
-        [ForeignKey("TaskId")]
-        public Task Task { get; set; }
+        public BoardUser Author { get; set; } = null!;
+
+        public Task Task { get; set; } = null!;
+
+        [InverseProperty("Comment")]
         public ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
 
     }

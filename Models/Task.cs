@@ -5,22 +5,37 @@ namespace KanbanBoard.Models
 {
     public class Task
     {
-        public Task () { DateOfMade = DateTime.UtcNow; }
-        [Key] public int TaskId { get; set; }
-        public string TaskName { get; set; }
-        public string TaskDescription { get; set; }
+        [Key]
+        public int TaskId { get; set; }
+        [MaxLength(50)]
+        public string TaskName { get; set; } = null!;
+        [MaxLength(3000)]
+        public string? TaskDescription { get; set; }
         public int? AssigneeId { get; set; }
         public int AuthorId { get; set; }
-        public int StatusId { get; set; }
-        public int BoardId { get; set; }
-        public DateTime DateOfMade { get; set; }
 
-        [InverseProperty("AuthoredTasks")] public BoardUser Author { get; set; }
-        [InverseProperty("AssignedTasks")] public BoardUser Assignee { get; set; }
-        [ForeignKey("BoardId")] public Board Board { get; set; }
-        [ForeignKey("StatusId")] public Status Status { get; set; }
+        [ForeignKey("Status")]
+        public int StatusId { get; set; }
+
+        [ForeignKey("Board")]
+        public int BoardId { get; set; }
+        public DateTime CreationDate { get; set; }
+        public DateTime DeadLine { get; set; }
+
+        public BoardUser Author { get; set; } = null!;
+
+        public BoardUser Assignee { get; set; } = null!;
+
+        
+        public Board Board { get; set; } = null!;
+
+        public Status Status { get; set; } = null!;
+
+        [InverseProperty("Task")]
         public ICollection<Comment> Comments {  get; set; } = new List<Comment> ();
+        [InverseProperty("Task")]
         public ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
+        [InverseProperty("Task")]
         public ICollection<TaskStatusHistory> TaskStatusHistories { get; set; } = new List<TaskStatusHistory>();
     }
 }

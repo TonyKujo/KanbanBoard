@@ -5,16 +5,20 @@ namespace KanbanBoard.Models
 {
     public class TaskStatusHistory
     {
-        public TaskStatusHistory() { ChangeDate = DateTime.UtcNow; }
-
-        [Key] public int StatusChangeId { get; set; }
+        [Key] 
+        public int StatusChangeId { get; set; }
+        [ForeignKey("Task")]
         public int TaskId { get; set; }
+        [ForeignKey("Status")]
         public int StatusId { get; set; }
+        [ForeignKey("Author")]
         public int AuthorId { get; set; }
         public DateTime ChangeDate { get; set; }
 
-        [ForeignKey("TaskId")] public Task Task { get; set; }
-        [ForeignKey("StatusId")] public Status Status { get; set; }
-        [ForeignKey("AuthorId")] public BoardUser Author { get; set; }
+        public Task Task { get; set; } = null!;
+
+        public Status Status { get; set; } = null!;
+
+        public BoardUser Author { get; set; } = null!;
     }
 }

@@ -5,15 +5,23 @@ namespace KanbanBoard.Models
 {
     public class Attachment
     {
-        public Attachment () { DateOfUpload = DateTime.UtcNow; }
-        [Key] public int AttachmentId { get; set; }
+        [Key] 
+        public int AttachmentId { get; set; }
+
+        [ForeignKey("Task")]
         public int? TaskId { get; set; }
+
+        [ForeignKey("Comment")]
+
         public int? CommentId { get; set; }
-        public string FileName { get; set; }
-        public string FilePath { get; set; }
+        [MaxLength(100)]
+        public string FileName { get; set; } = null!;
+        [MaxLength(1024)]
+        public string FilePath { get; set; } = null!;
         public DateTime DateOfUpload { get; set; }
 
-        [ForeignKey("TaskId")] public Task Task { get; set; }
-        [ForeignKey("CommentId")] public Comment Comment { get; set; }
+
+        public Task? Task { get; set; }
+        public Comment? Comment { get; set; }
     }
 }
