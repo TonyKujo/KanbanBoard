@@ -1,9 +1,8 @@
 ﻿using System.Security.Claims;
 
-namespace KanbanBoard.Models.Dto
+namespace KanbanBoard.Models.Responses;
+
+public class AuthResponse
 {
-    public class AuthDto
-    {
-        public ClaimsPrincipal ClaimsPrincipal { get; set; } = null!;
-    }
+    public ClaimsPrincipal ClaimsPrincipal { get; set; } = null!;
 }
