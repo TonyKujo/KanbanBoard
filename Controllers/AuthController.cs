@@ -1,4 +1,5 @@
 ﻿using KanbanBoard.Models.Requests;
+using KanbanBoard.Models.Responses;
 using KanbanBoard.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -48,6 +49,23 @@ namespace KanbanBoard.Controllers
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(result.ClaimsPrincipal));
 
             return Ok();
+        }
+
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [Route("api/auth/me")]
+        public async Task<IActionResult> UserInfo(CancellationToken ct)
+        {
+            var login = User.FindFirstValue(ClaimTypes.Name);
+
+            if (login == null)
+            {
+                return BadRequest("Не поняли кто!");
+            }
+
+            var result = await _authService.GetUserInfo(login, ct);
+
+            return Ok(result);
         }
 
         [HttpPost]
