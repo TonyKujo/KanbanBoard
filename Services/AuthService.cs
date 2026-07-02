@@ -53,6 +53,21 @@ namespace KanbanBoard.Services
             return CreatePrincipal(existingUser);
         }
 
+        public async Task<GetUserInfoRespones> GetUserInfo (string login, CancellationToken ct)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Login == login, ct) ?? throw new InvalidOperationException("Неверный логин!");
+        
+
+            var userInfoResponse = new GetUserInfoRespones()
+            {
+                UserId = user.UserId,
+                Login = user.Login,
+                DateOfRegistration = user.DateOfRegistration,
+            };
+
+            return userInfoResponse;
+        }
+
         private static AuthResponse CreatePrincipal(User user)
         {
             var claims = new List<Claim>
