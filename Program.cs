@@ -1,4 +1,5 @@
 using KanbanBoard.Data;
+using KanbanBoard.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,7 +16,21 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<AuthService>();
+
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Мой API v1");
+        c.InjectJavascript("/swagger-ui/custom.js");
+    });
+}
 
 app.UseRouting();
 
