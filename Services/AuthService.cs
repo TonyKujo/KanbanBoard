@@ -18,19 +18,20 @@ namespace KanbanBoard.Services
             _db = dbContext; 
         }
 
-        public async Task<AuthResponse> Register(RegisterRequest request, CancellationToken ct)
+        public async Task<AuthResponse?> Register(RegisterRequest request, CancellationToken ct)
         {
             var existingUser = await _db.Users.FirstOrDefaultAsync(u => u.Login == request.Login, ct);
 
             if (existingUser is not null)
             {
-                throw new InvalidOperationException("Пользователь с таким логином уже существует!");
+                return null;
             }
 
             var user = new User()
             {
                 Login = request.Login,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+                DateOfRegistration = DateTime.Now
             };
 
             _db.Users.Add(user);
@@ -40,14 +41,14 @@ namespace KanbanBoard.Services
             return CreatePrincipal(user);
         }
 
-        public async Task<AuthResponse> Login(LoginRequest request, CancellationToken ct) 
+        public async Task<AuthResponse?> Login(LoginRequest request, CancellationToken ct) 
         {
             var existingUser = await _db.Users.FirstOrDefaultAsync(u => u.Login == request.Login, ct);
 
             if (existingUser is null || !BCrypt.Net.BCrypt.Verify(request.Password, existingUser.PasswordHash)) 
             {
-                throw new InvalidOperationException("Неверный логин или пароль!");
-                
+                return null;
+
             }
 
             return CreatePrincipal(existingUser);

@@ -11,7 +11,7 @@ namespace KanbanBoard.Controllers
 {
     public class AuthController(AuthService authService) : Controller
     {
-        public AuthService _authService { get; set; } = authService;
+        private readonly AuthService _authService = authService;
 
         [HttpPost]
         [AllowAnonymous]
