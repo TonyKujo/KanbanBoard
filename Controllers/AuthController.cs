@@ -16,7 +16,7 @@ namespace KanbanBoard.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         [Route("api/auth/login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest model, CancellationToken ct)
         {
@@ -24,7 +24,7 @@ namespace KanbanBoard.Controllers
 
             if (result == null)
             {
-                return Unauthorized();
+               return Conflict("Такой логин отсутствует");
             }
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(result.ClaimsPrincipal));
@@ -35,7 +35,7 @@ namespace KanbanBoard.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         [Route("api/auth/register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest model, CancellationToken ct)
         {
@@ -43,7 +43,7 @@ namespace KanbanBoard.Controllers
 
             if (result == null)
             {
-                return Unauthorized();
+                return Conflict("Логин уже занят");
             }
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(result.ClaimsPrincipal));
