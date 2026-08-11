@@ -1,4 +1,5 @@
-﻿using KanbanBoard.Services;
+﻿using KanbanBoard.Models.Requests;
+using KanbanBoard.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -18,6 +19,20 @@ namespace KanbanBoard.Controllers
                 return Unauthorized("Пользователь не авторизован");
 
             var result = await _boardService.GetAllUserBoardsAsync(userId, ct);
+            return Ok(result);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Route("api/boards")]
+        public async Task<IActionResult> AddNewBoard([FromBody] BoardRequest request, CancellationToken ct)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
+                return Unauthorized("Пользователь не авторизован");
+
+            var result = await _boardService.CreateNewBoardAsync(userId, request.Name, request.Description,  ct);
             return Ok(result);
         }
     }
