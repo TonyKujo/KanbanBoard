@@ -20,13 +20,15 @@ namespace KanbanBoard.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Attachment>().ToTable(t => 
-                t.HasCheckConstraint(
+            modelBuilder.Entity<Attachment>().ToTable(t => t
+            .HasCheckConstraint(
                     "CK_Attachment_OneAttach",
                     "(\"TaskId\" IS NOT NULL AND \"CommentId\" IS NULL) OR (\"TaskId\" IS NULL AND \"CommentId\" IS NOT NULL)"
-                ));
+            ));
 
-            modelBuilder.Entity<User>().HasIndex(u => u.Login).IsUnique();
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Login)
+                .IsUnique();
         }
     }
 }

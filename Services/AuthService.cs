@@ -31,7 +31,7 @@ namespace KanbanBoard.Services
             {
                 Login = request.Login,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-                DateOfRegistration = DateTime.Now
+                DateOfRegistration = DateTime.UtcNow
             };
 
             _db.Users.Add(user);
@@ -73,7 +73,8 @@ namespace KanbanBoard.Services
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Login)
+                new Claim(ClaimTypes.Name, user.Login),
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString())
             };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
