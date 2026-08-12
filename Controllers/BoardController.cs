@@ -1,13 +1,21 @@
 ﻿using KanbanBoard.Models.Requests;
 using KanbanBoard.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace KanbanBoard.Controllers
 {
+    [Authorize]
     public class BoardController(BoardService boardService) : Controller
     {
         private readonly BoardService _boardService = boardService;
+
+        private int GetUserId()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(userIdClaim!);
+        }
 
         [HttpPut]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -16,9 +24,8 @@ namespace KanbanBoard.Controllers
         [Route ("api/boards/{boardId}")]
         public async Task<IActionResult> UpdateBoard(int boardId, [FromBody] BoardRequest request, CancellationToken ct)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
-                return Unauthorized("Пользователь не авторизован");
+
+            int userId = GetUserId();
 
             var result = await _boardService.UpdateBoardAsync(boardId, userId, request, ct);
 
@@ -34,9 +41,8 @@ namespace KanbanBoard.Controllers
         [Route("api/boards")]
         public async Task<IActionResult> GetAllUserBoards(CancellationToken ct)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
-                return Unauthorized("Пользователь не авторизован");
+            var userId = GetUserId();
+            if (userId == -1) return Unauthorized();
 
             var result = await _boardService.GetAllUserBoardsAsync(userId, ct);
             return Ok(result);
@@ -48,12 +54,11 @@ namespace KanbanBoard.Controllers
         [Route("api/boards")]
         public async Task<IActionResult> AddNewBoard([FromBody] BoardRequest request, CancellationToken ct)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
-                return Unauthorized("Пользователь не авторизован");
+            var userId = GetUserId();
+            if (userId == -1) return Unauthorized();
 
-            var result = await _boardService.CreateNewBoardAsync(userId, request.Name, request.Description, ct);
-            return Ok(result);
+            var result = await _boardService.CreateBoardAsync(userId, request, ct);
+            return CreatedAtAction(nameof(GetUserBoard), new { boardId = result.BoardId }, result);
         }
 
         [HttpGet]
@@ -63,9 +68,8 @@ namespace KanbanBoard.Controllers
         [Route("api/boards/{boardId}")]
         public async Task<IActionResult> GetUserBoard(int boardId, CancellationToken ct)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
-                return Unauthorized("Пользователь не авторизован");
+            var userId = GetUserId();
+            if (userId == -1) return Unauthorized();
 
             var result = await _boardService.GetBoardAsync(boardId, userId, ct);
             if (result == null)
@@ -80,9 +84,8 @@ namespace KanbanBoard.Controllers
         [Route("api/boards/{boardId}")]
         public async Task<IActionResult> DeleteUserBoard (int boardId, CancellationToken ct)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
-                return Unauthorized("Пользователь не авторизован");
+            var userId = GetUserId();
+            if (userId == -1) return Unauthorized();
 
             var result = await _boardService.DeleteBoardAsync(boardId, userId, ct);
             if(result == false)

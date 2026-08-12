@@ -14,7 +14,8 @@ namespace KanbanBoard.Services
             _db = dbContext;
         }
 
-        public async Task<BoardsResponse?> UpdateBoardAsync(int boardId, int userId, BoardRequest boardRequest, CancellationToken ct)
+
+        public async Task<BoardResponse?> UpdateBoardAsync(int boardId, int userId, BoardRequest boardRequest, CancellationToken ct)
         {
             var board = await _db.Boards
                 .FirstOrDefaultAsync(b => b.BoardId == boardId && b.AuthorId == userId && b.BoardUsers.Any(bu => bu.UserId == userId), ct);
@@ -27,7 +28,7 @@ namespace KanbanBoard.Services
 
             await _db.SaveChangesAsync(ct);
 
-            return new BoardsResponse
+            return new BoardResponse
             {
                 BoardId = board.BoardId,
                 NameOfBoard = board.NameOfBoard,
@@ -41,7 +42,7 @@ namespace KanbanBoard.Services
         public async Task<bool> DeleteBoardAsync(int boardId, int userId, CancellationToken ct)
         {
             var board = await _db.Boards
-                .FirstOrDefaultAsync(b => b.BoardId == boardId && b.BoardUsers.Any(bu => bu.UserId == userId), ct);
+                .FirstOrDefaultAsync(b => b.BoardId == boardId && b.AuthorId == userId && b.BoardUsers.Any(bu => bu.UserId == userId), ct);
             if (board is null)
                 return false;
 
@@ -52,7 +53,7 @@ namespace KanbanBoard.Services
             return true;
         }
 
-        public async Task<BoardsResponse?> GetBoardAsync(int boardId, int userId, CancellationToken ct)
+        public async Task<BoardResponse?> GetBoardAsync(int boardId, int userId, CancellationToken ct)
         {
             var board = await _db.Boards
                 .Include(b => b.Author)
@@ -61,7 +62,7 @@ namespace KanbanBoard.Services
             if (board is null)
                 return null;
 
-            return new BoardsResponse
+            return new BoardResponse
             {
                 BoardId = board.BoardId,
                 NameOfBoard = board.NameOfBoard,
@@ -74,12 +75,12 @@ namespace KanbanBoard.Services
                 DateOfMade = board.DateOfMade
             };
         }
-        public async Task<BoardsResponse> CreateNewBoardAsync (int userId, string name, string description, CancellationToken ct)
+        public async Task<BoardResponse> CreateBoardAsync (int userId, BoardRequest request, CancellationToken ct)
         {
             var board = new Board
             {
-                NameOfBoard = name,
-                Description = description,
+                NameOfBoard = request.Name,
+                Description = request.Description,
                 AuthorId = userId,
                 DateOfMade = DateTime.UtcNow
             };
@@ -89,14 +90,13 @@ namespace KanbanBoard.Services
                 Board = board,
                 DateOfJoin = DateTime.UtcNow
             };
-            _db.Boards.Add(board);
             _db.BoardUsers.Add(boardUser);
 
 
             await _db.SaveChangesAsync(ct);
 
 
-            return new BoardsResponse
+            return new BoardResponse
             {
                 BoardId = board.BoardId,
                 NameOfBoard = board.NameOfBoard,
@@ -106,11 +106,11 @@ namespace KanbanBoard.Services
             };
 
         }
-        public async Task<List<BoardsResponse>> GetAllUserBoardsAsync( int userId, CancellationToken ct) 
+        public async Task<List<BoardResponse>> GetAllUserBoardsAsync( int userId, CancellationToken ct) 
         {
             var boards = await _db.Boards
             .Where(b => b.BoardUsers.Any(bu => bu.UserId == userId))
-            .Select(b => new BoardsResponse
+            .Select(b => new BoardResponse
             {
                 BoardId = b.BoardId,
                 NameOfBoard = b.NameOfBoard,

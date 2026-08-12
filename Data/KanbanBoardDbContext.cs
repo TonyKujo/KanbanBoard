@@ -20,6 +20,10 @@ namespace KanbanBoard.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<BoardUser>()
+            .HasIndex(bu => new { bu.UserId, bu.BoardId })
+            .IsUnique();
+
             modelBuilder.Entity<Attachment>().ToTable(t => t
             .HasCheckConstraint(
                     "CK_Attachment_OneAttach",

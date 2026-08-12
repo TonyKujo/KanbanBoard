@@ -19,6 +19,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<BoardService>();
 
 var app = builder.Build();
 

@@ -1,6 +1,6 @@
 ﻿namespace KanbanBoard.Models.Responses
 {
-    public class BoardsResponse
+    public class BoardResponse
     {
         public int BoardId { get; set; }
         public string NameOfBoard { get; set; } = null!;
