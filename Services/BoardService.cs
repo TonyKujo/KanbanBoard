@@ -2,6 +2,7 @@
 using KanbanBoard.Models.Responses;
 using Microsoft.EntityFrameworkCore;
 using KanbanBoard.Models;
+using KanbanBoard.Models.Requests;
 namespace KanbanBoard.Services
 {
     public class BoardService
@@ -12,6 +13,30 @@ namespace KanbanBoard.Services
         {
             _db = dbContext;
         }
+
+        public async Task<BoardsResponse?> UpdateBoardAsync(int boardId, int userId, BoardRequest boardRequest, CancellationToken ct)
+        {
+            var board = await _db.Boards
+                .FirstOrDefaultAsync(b => b.BoardId == boardId && b.AuthorId == userId && b.BoardUsers.Any(bu => bu.UserId == userId), ct);
+
+            if (board is null)
+                return null;
+
+            board.NameOfBoard = boardRequest.Name;
+            board.Description = boardRequest.Description;
+
+            await _db.SaveChangesAsync(ct);
+
+            return new BoardsResponse
+            {
+                BoardId = board.BoardId,
+                NameOfBoard = board.NameOfBoard,
+                Description = board.Description,
+                Author = new AuthorResponse { AuthorId = board.AuthorId },
+                DateOfMade = board.DateOfMade
+            };
+        }
+
 
         public async Task<bool> DeleteBoardAsync(int boardId, int userId, CancellationToken ct)
         {

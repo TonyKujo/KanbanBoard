@@ -8,6 +8,26 @@ namespace KanbanBoard.Controllers
     public class BoardController(BoardService boardService) : Controller
     {
         private readonly BoardService _boardService = boardService;
+
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Route ("api/boards/{boardId}")]
+        public async Task<IActionResult> UpdateBoard(int boardId, [FromBody] BoardRequest request, CancellationToken ct)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
+                return Unauthorized("Пользователь не авторизован");
+
+            var result = await _boardService.UpdateBoardAsync(boardId, userId, request, ct);
+
+            if (result == null)
+                return NotFound();
+            return Ok(result);
+        }
+
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
