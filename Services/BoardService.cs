@@ -12,6 +12,21 @@ namespace KanbanBoard.Services
         {
             _db = dbContext;
         }
+
+        public async Task<bool> DeleteBoardAsync(int boardId, int userId, CancellationToken ct)
+        {
+            var board = await _db.Boards
+                .FirstOrDefaultAsync(b => b.BoardId == boardId && b.BoardUsers.Any(bu => bu.UserId == userId), ct);
+            if (board is null)
+                return false;
+
+            _db.Boards.Remove(board);
+
+            await _db.SaveChangesAsync(ct);
+
+            return true;
+        }
+
         public async Task<BoardsResponse?> GetBoardAsync(int boardId, int userId, CancellationToken ct)
         {
             var board = await _db.Boards

@@ -52,5 +52,22 @@ namespace KanbanBoard.Controllers
                 return NotFound();
             return Ok(result);
         }
+
+        [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Route("api/boards/{boardId}")]
+        public async Task<IActionResult> DeleteUserBoard (int boardId, CancellationToken ct)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
+                return Unauthorized("Пользователь не авторизован");
+
+            var result = await _boardService.DeleteBoardAsync(boardId, userId, ct);
+            if(result == false)
+                return NotFound();
+            return NoContent();
+        }
     }
 }
