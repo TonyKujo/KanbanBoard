@@ -12,8 +12,29 @@ namespace KanbanBoard.Services
         {
             _db = dbContext;
         }
+        public async Task<BoardsResponse?> GetBoardAsync(int boardId, int userId, CancellationToken ct)
+        {
+            var board = await _db.Boards
+                .Include(b => b.Author)
+                .FirstOrDefaultAsync(b => b.BoardId == boardId && b.BoardUsers.Any(bu => bu.UserId == userId), ct);
 
-        public async Task<AllUserBoardsResponse> CreateNewBoardAsync (int userId, string name, string description, CancellationToken ct)
+            if (board is null)
+                return null;
+
+            return new BoardsResponse
+            {
+                BoardId = board.BoardId,
+                NameOfBoard = board.NameOfBoard,
+                Description = board.Description,
+                Author = new AuthorResponse
+                {
+                    AuthorId = board.Author.UserId,
+                    Login = board.Author.Login
+                },
+                DateOfMade = board.DateOfMade
+            };
+        }
+        public async Task<BoardsResponse> CreateNewBoardAsync (int userId, string name, string description, CancellationToken ct)
         {
             var board = new Board
             {
@@ -35,26 +56,26 @@ namespace KanbanBoard.Services
             await _db.SaveChangesAsync(ct);
 
 
-            return new AllUserBoardsResponse
+            return new BoardsResponse
             {
                 BoardId = board.BoardId,
                 NameOfBoard = board.NameOfBoard,
                 Description = board.Description,
-                AuthorId = board.AuthorId,
+                Author = new AuthorResponse { AuthorId = board.AuthorId },
                 DateOfMade = board.DateOfMade
             };
 
         }
-        public async Task<List<AllUserBoardsResponse>> GetAllUserBoardsAsync( int userId, CancellationToken ct) 
+        public async Task<List<BoardsResponse>> GetAllUserBoardsAsync( int userId, CancellationToken ct) 
         {
             var boards = await _db.Boards
             .Where(b => b.BoardUsers.Any(bu => bu.UserId == userId))
-            .Select(b => new AllUserBoardsResponse
+            .Select(b => new BoardsResponse
             {
                 BoardId = b.BoardId,
                 NameOfBoard = b.NameOfBoard,
                 Description = b.Description,
-                AuthorId = b.AuthorId,
+                Author = new AuthorResponse { AuthorId = b.AuthorId },
                 DateOfMade = b.DateOfMade
             })
             .ToListAsync(ct);
