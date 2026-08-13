@@ -1,8 +1,8 @@
 ﻿namespace KanbanBoard.Models.Responses
 {
-    public class AuthorResponse
+    public class UserResponse
     {
-        public int AuthorId { get; set; }
+        public int UserId { get; set; }
         public string Login { get; set; } = null!;
     }
 }

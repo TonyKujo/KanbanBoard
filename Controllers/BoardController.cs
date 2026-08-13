@@ -42,7 +42,6 @@ namespace KanbanBoard.Controllers
         public async Task<IActionResult> GetAllUserBoards(CancellationToken ct)
         {
             var userId = GetUserId();
-            if (userId == -1) return Unauthorized();
 
             var result = await _boardService.GetAllUserBoardsAsync(userId, ct);
             return Ok(result);
@@ -55,7 +54,6 @@ namespace KanbanBoard.Controllers
         public async Task<IActionResult> AddNewBoard([FromBody] BoardRequest request, CancellationToken ct)
         {
             var userId = GetUserId();
-            if (userId == -1) return Unauthorized();
 
             var result = await _boardService.CreateBoardAsync(userId, request, ct);
             return CreatedAtAction(nameof(GetUserBoard), new { boardId = result.BoardId }, result);
@@ -69,7 +67,6 @@ namespace KanbanBoard.Controllers
         public async Task<IActionResult> GetUserBoard(int boardId, CancellationToken ct)
         {
             var userId = GetUserId();
-            if (userId == -1) return Unauthorized();
 
             var result = await _boardService.GetBoardAsync(boardId, userId, ct);
             if (result == null)
@@ -85,7 +82,6 @@ namespace KanbanBoard.Controllers
         public async Task<IActionResult> DeleteUserBoard (int boardId, CancellationToken ct)
         {
             var userId = GetUserId();
-            if (userId == -1) return Unauthorized();
 
             var result = await _boardService.DeleteBoardAsync(boardId, userId, ct);
             if(result == false)

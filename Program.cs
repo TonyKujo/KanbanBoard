@@ -32,6 +32,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<BoardService>();
+builder.Services.AddScoped<TaskService>();
 
 var app = builder.Build();
 

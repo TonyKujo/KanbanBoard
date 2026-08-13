@@ -33,7 +33,7 @@ namespace KanbanBoard.Services
                 BoardId = board.BoardId,
                 NameOfBoard = board.NameOfBoard,
                 Description = board.Description,
-                Author = new AuthorResponse { AuthorId = board.AuthorId },
+                Author = new UserResponse { UserId = board.AuthorId },
                 DateOfMade = board.DateOfMade
             };
         }
@@ -67,9 +67,9 @@ namespace KanbanBoard.Services
                 BoardId = board.BoardId,
                 NameOfBoard = board.NameOfBoard,
                 Description = board.Description,
-                Author = new AuthorResponse
+                Author = new UserResponse
                 {
-                    AuthorId = board.Author.UserId,
+                    UserId = board.Author.UserId,
                     Login = board.Author.Login
                 },
                 DateOfMade = board.DateOfMade
@@ -101,7 +101,7 @@ namespace KanbanBoard.Services
                 BoardId = board.BoardId,
                 NameOfBoard = board.NameOfBoard,
                 Description = board.Description,
-                Author = new AuthorResponse { AuthorId = board.AuthorId },
+                Author = new UserResponse { UserId = board.AuthorId },
                 DateOfMade = board.DateOfMade
             };
 
@@ -115,7 +115,7 @@ namespace KanbanBoard.Services
                 BoardId = b.BoardId,
                 NameOfBoard = b.NameOfBoard,
                 Description = b.Description,
-                Author = new AuthorResponse { AuthorId = b.AuthorId },
+                Author = new UserResponse { UserId = b.AuthorId },
                 DateOfMade = b.DateOfMade
             })
             .ToListAsync(ct);
