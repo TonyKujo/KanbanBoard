@@ -19,6 +19,57 @@ namespace KanbanBoard.Services
         {
             return await _db.BoardUsers
                 .AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId, ct);
+
+            
+        }
+
+        public async Task<StatusHistoryResponse?> ChangeTaskStatusAsync(int boardId, int userId, int taskId, StatusHistoryRequest request ,CancellationToken ct)
+        {
+            if (!await IsUserBoardMemberAsync(boardId, userId, ct))
+            {
+                return null;
+            }
+
+            var workerFromThisBoard = await _db.BoardUsers
+            .FirstOrDefaultAsync(bu => bu.UserId == userId && bu.BoardId == boardId, ct);
+
+            if (workerFromThisBoard == null)
+                return null;
+
+            var changedTaskByStatus = await _db.Tasks
+            .FirstOrDefaultAsync(t => t.BoardId == boardId && t.TaskId == taskId, ct);
+
+            var newStatus = await _db.Statuses
+                .Where(s => s.StatusId == request.NewStatusId && s.BoardId == boardId)
+                .FirstOrDefaultAsync(ct);
+
+            if (changedTaskByStatus == null || newStatus == null)
+            {
+                return null;
+            }
+
+            changedTaskByStatus.StatusId = newStatus.StatusId;
+
+            var history = new TaskStatusHistory
+            {
+                TaskId = changedTaskByStatus.TaskId,
+                StatusId = newStatus.StatusId,
+                AuthorId = workerFromThisBoard.BoardUserId,
+                ChangeDate = DateTime.UtcNow
+            };
+            _db.TaskStatusHistories.Add(history);
+            await _db.SaveChangesAsync(ct);
+
+            return new StatusHistoryResponse
+            {
+                TaskId = changedTaskByStatus.TaskId,
+                Status = new StatusResponse
+                {
+                    StatusId = newStatus.StatusId,
+                    StatusName = newStatus.StatusName
+                },
+                LastStatusChangeDate = history.ChangeDate
+            };
         }
 
         public async Task<bool> DeleteTaskAsync(int boardId, int userId, int taskId, CancellationToken ct)

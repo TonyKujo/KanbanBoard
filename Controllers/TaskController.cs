@@ -85,5 +85,21 @@ namespace KanbanBoard.Controllers
                 return NotFound();
             return NoContent();
         }
+
+        [HttpPatch]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Route("api/boards/{boardId}/tasks/{taskId}/status")]
+        public async Task<IActionResult> ChangeStatus(int boardId, int taskId, [FromBody] StatusHistoryRequest request, CancellationToken ct)
+        {
+            var userId = GetUserId();
+
+            var result = await _taskService.ChangeTaskStatusAsync(boardId, userId, taskId, request, ct);
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
     }
 }
