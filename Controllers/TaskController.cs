@@ -1,4 +1,5 @@
-﻿using KanbanBoard.Models.Requests;
+﻿using KanbanBoard.Models;
+using KanbanBoard.Models.Requests;
 using KanbanBoard.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -68,6 +69,21 @@ namespace KanbanBoard.Controllers
             }
 
             return Ok(result);
+        }
+
+        [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Route("api/boards/{boardId}/tasks/{taskId}")]
+        public async Task<IActionResult> DeleteTask(int boardId, int taskId, CancellationToken ct)
+        {
+            var userId = GetUserId();
+
+            var result = await _taskService.DeleteTaskAsync(boardId, userId, taskId, ct);
+            if (result == false)
+                return NotFound();
+            return NoContent();
         }
     }
 }
