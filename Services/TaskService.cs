@@ -1,4 +1,5 @@
 ﻿using KanbanBoard.Data;
+using KanbanBoard.Models;
 using KanbanBoard.Models.Requests;
 using KanbanBoard.Models.Responses;
 using Microsoft.EntityFrameworkCore;
@@ -20,16 +21,32 @@ namespace KanbanBoard.Services
                 .AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId, ct);
         }
 
-        public async Task<TaskResponse> CreateTaskAsync(int boardId, int userId, TaskRequest request,  CancellationToken ct)
+        public async Task<TaskResponse?> CreateTaskAsync(int boardId, int userId, TaskRequest request,  CancellationToken ct)
         {
+            if(!await IsUserBoardMemberAsync(boardId, userId, ct))
+            {
+                return null;
+            }
+
+
             var workerFromThisBoard = await _db.BoardUsers
-            .FirstOrDefaultAsync(bu => bu.UserId == request.WorkerId && bu.BoardId == boardId);
+            .FirstOrDefaultAsync(bu => bu.UserId == request.WorkerId && bu.BoardId == boardId, ct);
 
             var authorFromThisBoard = await _db.BoardUsers
             .FirstOrDefaultAsync(bu => bu.UserId == userId && bu.BoardId == boardId, ct);
 
             if (workerFromThisBoard == null || authorFromThisBoard == null)
                 return null;
+
+            var defaultStatus = await _db.Statuses
+                .Where(s => s.BoardId == boardId)
+                .OrderBy(s => s.StatusId)
+                .FirstOrDefaultAsync(ct);
+
+            if (defaultStatus == null)
+            {
+                return null;
+            }
 
             var task = new Task
             {
@@ -38,6 +55,7 @@ namespace KanbanBoard.Services
                 AssigneeId = workerFromThisBoard.BoardUserId,
                 AuthorId = authorFromThisBoard.BoardUserId,
                 BoardId = boardId,
+                StatusId = defaultStatus.StatusId,
                 DeadLine = request.Deadline,
                 CreationDate = DateTime.UtcNow,
             };
@@ -45,9 +63,10 @@ namespace KanbanBoard.Services
             
 
             _db.Tasks.Add(task);
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(ct);
 
             var createdTask = await _db.Tasks
+            .Include(t => t.Status)
             .Include(t => t.Author).ThenInclude(bu => bu.User)
             .Include(t => t.Assignee).ThenInclude(bu => bu.User)
             .FirstAsync(t => t.TaskId == task.TaskId, ct);
@@ -59,6 +78,11 @@ namespace KanbanBoard.Services
                 TaskDescription = createdTask.TaskDescription,
                 Deadline = createdTask.DeadLine,
                 DateOfMade = createdTask.CreationDate,
+                Status = new StatusResponse
+                {
+                    StatusId = createdTask.Status.StatusId,
+                    StatusName = createdTask.Status.StatusName
+                },
                 Author = new UserResponse
                 {
                     UserId = createdTask.Author.UserId,
@@ -72,11 +96,15 @@ namespace KanbanBoard.Services
 
             };
 
-            //Нужно добавить сюды установку статуса. Но прежде чем - реализовать полный функционал с ними, чтобы было что добавлять
         }
 
-        public async Task<List<TaskResponse>> GetAllBoardTasksAsync(int boardId, CancellationToken ct)
+        public async Task<List<TaskResponse>?> GetAllBoardTasksAsync(int boardId, int userId, CancellationToken ct)
         {
+            if (!await IsUserBoardMemberAsync(boardId, userId, ct))
+            {
+                return null;
+            }
+
             var tasks = await _db.Tasks
                 .Where(t => t.BoardId == boardId)
                 .Select(t => new TaskResponse

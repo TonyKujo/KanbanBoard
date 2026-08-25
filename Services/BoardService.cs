@@ -8,10 +8,12 @@ namespace KanbanBoard.Services
     public class BoardService
     {
         private readonly KanbanBoardDbContext _db;
+        private readonly StatusService _statusService;
 
-        public BoardService(KanbanBoardDbContext dbContext)
+        public BoardService(KanbanBoardDbContext dbContext, StatusService statusService)
         {
             _db = dbContext;
+            _statusService = statusService;
         }
 
 
@@ -94,6 +96,8 @@ namespace KanbanBoard.Services
 
 
             await _db.SaveChangesAsync(ct);
+
+            await _statusService.CreateDefaultStatusesAsync(board.BoardId, ct);
 
 
             return new BoardResponse

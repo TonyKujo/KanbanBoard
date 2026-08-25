@@ -1,6 +1,8 @@
-﻿using KanbanBoard.Services;
+﻿using KanbanBoard.Models.Requests;
+using KanbanBoard.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace KanbanBoard.Controllers
 {
@@ -9,14 +11,42 @@ namespace KanbanBoard.Controllers
     {
         private readonly TaskService _taskService = taskService;
 
+        private int GetUserId()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(userIdClaim!);
+        }
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Route ("api/boards/{boardId}/tasks")]
 
         public async Task<IActionResult> GetAllBoardTasksAsync(int boardId, CancellationToken ct)
         {
-            var result = await _taskService.GetAllBoardTasksAsync(boardId, ct);
+            int userId = GetUserId();
+            var result = await _taskService.GetAllBoardTasksAsync(boardId, userId, ct);
+            if (result == null)
+                return NotFound();
+            return Ok(result);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Route("api/boards/{boardId}/tasks")]
+        public async Task<IActionResult> AddNewTask(int boardId, [FromBody] TaskRequest request, CancellationToken ct)
+        {
+            int userId = GetUserId();
+
+            var result = await _taskService.CreateTaskAsync(boardId, userId, request, ct);
+
+            if(result == null)
+            {
+                return NotFound();
+            }
 
             return Ok(result);
         }
