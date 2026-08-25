@@ -21,6 +21,65 @@ namespace KanbanBoard.Services
                 .AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId, ct);
         }
 
+        public async Task<TaskResponse?> UpdateTaskAsync(int boardId, int userId, int taskId, TaskRequest request, CancellationToken ct)
+        {
+            if (!await IsUserBoardMemberAsync(boardId, userId, ct))
+            {
+                return null;
+            }
+
+            var workerFromThisBoard = await _db.BoardUsers
+            .FirstOrDefaultAsync(bu => bu.UserId == request.WorkerId && bu.BoardId == boardId, ct);
+
+            if (workerFromThisBoard == null)
+                return null;
+
+            var task = await _db.Tasks
+            .FirstOrDefaultAsync(t => t.TaskId == taskId && t.BoardId == boardId, ct);
+
+            if (task is null)
+                return null;
+
+            task.TaskName = request.TaskName;
+
+            task.TaskDescription = request.TaskDescription;
+            task.DeadLine = request.Deadline;
+            task.Assignee = workerFromThisBoard;
+
+            await _db.SaveChangesAsync(ct);
+
+            var updatedTask = await _db.Tasks
+            .Include(t => t.Status)
+            .Include(t => t.Author).ThenInclude(bu => bu.User)
+            .Include(t => t.Assignee).ThenInclude(bu => bu.User)
+            .FirstAsync(t => t.TaskId == taskId, ct);
+
+            return new TaskResponse
+            {
+                TaskId = updatedTask.TaskId,
+                TaskName = updatedTask.TaskName,
+                TaskDescription = updatedTask.TaskDescription,
+                Deadline = updatedTask.DeadLine,
+                DateOfMade = updatedTask.CreationDate,
+                Status = new StatusResponse
+                {
+                    StatusId = updatedTask.Status.StatusId,
+                    StatusName = updatedTask.Status.StatusName
+                },
+                Author = new UserResponse
+                {
+                    UserId = updatedTask.Author.UserId,
+                    Login = updatedTask.Author.User.Login
+                },
+                Worker = new UserResponse
+                {
+                    UserId = updatedTask.Assignee.UserId,
+                    Login = updatedTask.Assignee.User.Login
+                }
+
+            };
+        }
+
         public async Task<TaskResponse?> CreateTaskAsync(int boardId, int userId, TaskRequest request,  CancellationToken ct)
         {
             if(!await IsUserBoardMemberAsync(boardId, userId, ct))
