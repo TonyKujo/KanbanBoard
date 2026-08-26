@@ -67,5 +67,22 @@ namespace KanbanBoard.Controllers
 
             return NoContent();
         }
+
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Route("api/boards/{boardId}/tasks/{taskId}/comments/{commentId}")]
+        public async Task<IActionResult> UpdateTaskComment(int boardId, int taskId, int commentId, [FromBody] CommentRequest request, CancellationToken ct)
+        {
+            var userId = GetUserId();
+
+            var result = await _commentService.EditTaskCommentAsync(boardId, userId, taskId, commentId, request, ct);
+
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
     }
 }

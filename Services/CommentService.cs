@@ -3,6 +3,7 @@ using KanbanBoard.Models;
 using KanbanBoard.Models.Requests;
 using KanbanBoard.Models.Responses;
 using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata.Conventions;
 using System.Threading.Tasks;
 
 namespace KanbanBoard.Services
@@ -21,6 +22,50 @@ namespace KanbanBoard.Services
             return await _db.BoardUsers.AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId, ct);
 
 
+        }
+
+        public async Task<CommentResponse?> EditTaskCommentAsync( int boardId, int userId, int taskId, int commentId, CommentRequest request, CancellationToken ct)
+        {
+            if (!await IsUserBoardMemberAsync(boardId, userId, ct))
+                return null;
+
+            var authorFromThisBoard = await _db.BoardUsers
+                .FirstOrDefaultAsync(bu => bu.UserId == userId && bu.BoardId == boardId, ct);
+            if (authorFromThisBoard == null)
+                return null;
+
+            var taskFromThisBoard = await _db.Tasks
+                .FirstOrDefaultAsync(t => t.TaskId == taskId && t.BoardId == boardId, ct);
+            if (taskFromThisBoard == null)
+                return null;
+
+            var commentToUpdate = await _db.Comments
+                .FirstOrDefaultAsync(c => c.CommentId == commentId
+                                        && c.TaskId == taskId
+                                        && c.AuthorId == authorFromThisBoard.BoardUserId, ct);
+            if (commentToUpdate == null)
+                return null;
+
+            commentToUpdate.Text = request.Text;
+            commentToUpdate.IsEdited = true;
+
+            await _db.SaveChangesAsync(ct);
+
+            var updatedComment = await _db.Comments
+                .Include(c => c.Author).ThenInclude(bu => bu.User)
+                .FirstAsync(c => c.CommentId == commentToUpdate.CommentId, ct);
+
+            return new CommentResponse
+            {
+                CommentId = updatedComment.CommentId,
+                Text = updatedComment.Text,
+                MadeDate = updatedComment.DateOfMade,
+                Author = new UserResponse
+                {
+                    UserId = updatedComment.Author.UserId,
+                    Login = updatedComment.Author.User.Login
+                }
+            };
         }
 
         public async Task<bool> DeleteCommentFromTaskAsync(int boardId, int userId, int taskId, int commentId, CancellationToken ct)
