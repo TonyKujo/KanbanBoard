@@ -1,6 +1,9 @@
 ﻿using KanbanBoard.Data;
+using KanbanBoard.Models;
+using KanbanBoard.Models.Requests;
 using KanbanBoard.Models.Responses;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace KanbanBoard.Services
 {
@@ -17,6 +20,54 @@ namespace KanbanBoard.Services
         {
             return await _db.BoardUsers.AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId, ct);
 
+
+        }
+
+        public async Task<CommentResponse?> CreateCommentToTaskAsync(int boardId, int userId, int taskId, CommentRequest request, CancellationToken ct)
+        {
+            if (!await IsUserBoardMemberAsync(boardId, userId, ct))
+            {
+                return null;
+            }
+
+            var authorFromThisBoard = await _db.BoardUsers.FirstOrDefaultAsync(bu => bu.UserId == userId && bu.BoardId == boardId, ct);
+
+            if (authorFromThisBoard == null)
+                return null;
+
+            var taskFromThisBoard = await _db.Tasks.FirstOrDefaultAsync(t => t.TaskId == taskId && t.BoardId == boardId, ct);
+
+            if (taskFromThisBoard == null)
+                return null;
+
+            var newComment = new Comment
+            {
+                AuthorId = authorFromThisBoard.BoardUserId,
+                TaskId = taskId,
+                IsEdited = false,
+                Text = request.Text,
+                DateOfMade = DateTime.UtcNow,
+            };
+
+            _db.Comments.Add(newComment);
+
+            await _db.SaveChangesAsync(ct);
+
+            var createdComment = await _db.Comments
+                .Include(c => c.Author).ThenInclude(bu => bu.User)
+                .FirstAsync(c => c.CommentId == newComment.CommentId, ct);
+
+            return new CommentResponse
+            {
+                CommentId = newComment.CommentId,
+                Text = newComment.Text,
+                MadeDate = newComment.DateOfMade,
+                Author = new UserResponse
+                {
+                    UserId = createdComment.Author.UserId,
+                    Login = createdComment.Author.User.Login
+                },
+            };
 
         }
 
