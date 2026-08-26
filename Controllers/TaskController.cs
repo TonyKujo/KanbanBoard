@@ -1,5 +1,4 @@
-﻿using KanbanBoard.Models;
-using KanbanBoard.Models.Requests;
+﻿using KanbanBoard.Models.Requests;
 using KanbanBoard.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
