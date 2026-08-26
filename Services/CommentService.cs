@@ -23,6 +23,37 @@ namespace KanbanBoard.Services
 
         }
 
+        public async Task<bool> DeleteCommentFromTaskAsync(int boardId, int userId, int taskId, int commentId, CancellationToken ct)
+        {
+            if (!await IsUserBoardMemberAsync(boardId, userId, ct))
+            {
+                return false;
+            }
+
+            var authorFromThisBoard = await _db.BoardUsers.FirstOrDefaultAsync(bu => bu.UserId == userId && bu.BoardId == boardId, ct);
+
+            if (authorFromThisBoard == null)
+                return false;
+
+            var commentToDelete = await _db.Comments
+            .Include(c => c.Task)
+            .FirstOrDefaultAsync(c => c.CommentId == commentId
+                                     && c.TaskId == taskId
+                                     && c.Task.BoardId == boardId, ct);
+
+            if (commentToDelete == null)
+                return false;
+
+            if (commentToDelete.AuthorId != authorFromThisBoard.BoardUserId)
+                return false;
+
+            _db.Comments.Remove(commentToDelete);
+
+            await _db.SaveChangesAsync(ct);
+
+            return true;
+        }
+
         public async Task<CommentResponse?> CreateCommentToTaskAsync(int boardId, int userId, int taskId, CommentRequest request, CancellationToken ct)
         {
             if (!await IsUserBoardMemberAsync(boardId, userId, ct))
