@@ -2,6 +2,8 @@
 using KanbanBoard.Models;
 using KanbanBoard.Models.Responses;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Mail;
+using Attachment = KanbanBoard.Models.Attachment;
 
 namespace KanbanBoard.Services
 {
@@ -17,6 +19,50 @@ namespace KanbanBoard.Services
         private async Task<bool> IsUserBoardMemberAsync(int boardId, int userId, CancellationToken ct)
         {
             return await _db.BoardUsers.AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId, ct);
+        }
+
+        public async Task<bool> DeleteAttachmentAsync(int boardId, int userId, int attachmentId, CancellationToken ct)
+        {
+            if (!await IsUserBoardMemberAsync(boardId, userId, ct))
+                return false;
+
+            var AttachmentToDelete = await _db.Attachments
+                .Include(a => a.Task)
+                .Include(a => a.Comment).ThenInclude(c => c.Task)
+                .FirstOrDefaultAsync(a => a.AttachmentId == attachmentId, ct);
+
+            if (AttachmentToDelete == null)
+                return false;
+
+            if ((AttachmentToDelete.Task != null && AttachmentToDelete.Task.BoardId != boardId))
+                return false;
+            if (AttachmentToDelete.Comment != null && AttachmentToDelete.Comment.Task.BoardId != boardId)
+                return false;
+
+            var uploader = await _db.BoardUsers
+                .Include(bu => bu.User)
+                .FirstOrDefaultAsync(bu => bu.UserId == userId && bu.BoardId == boardId, ct);
+
+            if (uploader == null)
+                return false;
+
+
+
+            if (AttachmentToDelete.Task != null && AttachmentToDelete.Task.AuthorId != uploader.BoardUserId)
+                return false;
+
+            if (AttachmentToDelete.Comment != null && AttachmentToDelete.Comment.AuthorId != uploader.BoardUserId)
+                return false;
+
+
+            var fullPath = Path.Combine(Directory.GetCurrentDirectory(), AttachmentToDelete.FilePath);
+            if (File.Exists(fullPath))
+                File.Delete(fullPath);
+
+            _db.Attachments.Remove(AttachmentToDelete);
+            await _db.SaveChangesAsync(ct);
+
+            return true;
         }
 
         public async Task<(Stream Stream, string FileName, string ContentType)?> DownloadAttachmentAsync(int boardId, int userId, int attachmentId, CancellationToken ct)
