@@ -23,5 +23,8 @@ namespace KanbanBoard.Models
         public ICollection<Task> AuthoredTasks { get; set; } = new List<Task>();
         [InverseProperty("Assignee")]
         public ICollection<Task> AssignedTasks { get; set; } = new List<Task>();
+
+        [InverseProperty("Uploader")]
+        public ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
     }
 }

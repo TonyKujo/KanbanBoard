@@ -14,6 +14,10 @@ namespace KanbanBoard.Models
         [ForeignKey("Comment")]
 
         public int? CommentId { get; set; }
+
+        [ForeignKey("Uploader")]
+        public int UploaderId { get; set; }
+
         [MaxLength(100)]
         public string FileName { get; set; } = null!;
         [MaxLength(1024)]
@@ -23,5 +27,6 @@ namespace KanbanBoard.Models
 
         public Task? Task { get; set; }
         public Comment? Comment { get; set; }
+        public BoardUser Uploader { get; set; } = null!;
     }
 }
