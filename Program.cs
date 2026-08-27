@@ -35,6 +35,7 @@ builder.Services.AddScoped<BoardService>();
 builder.Services.AddScoped<TaskService>();
 builder.Services.AddScoped<StatusService>();
 builder.Services.AddScoped<CommentService>();
+builder.Services.AddScoped<AttachmentService>();
 
 var app = builder.Build();
 
