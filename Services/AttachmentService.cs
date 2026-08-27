@@ -19,8 +19,55 @@ namespace KanbanBoard.Services
             return await _db.BoardUsers.AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId, ct);
         }
 
-        public async Task<AttachmentResponse?> UploadAttachmentToTaskAsync(
-            int boardId, int userId, int taskId, IFormFile file, CancellationToken ct)
+        public async Task<List<AttachmentResponse>?> GetAllCommentsAttachments(int boardId, int userId, int commentId, CancellationToken ct)
+        {
+            if (!await IsUserBoardMemberAsync(boardId, userId, ct))
+                return null;
+
+            var attachments = await _db.Attachments
+                .Where(a => a.Comment != null && a.CommentId == commentId && a.Comment!.Task.BoardId == boardId)
+                .Select(a => new AttachmentResponse
+                {
+                    AttachmentId = a.AttachmentId,
+                    DateOfUpload = a.DateOfUpload,
+                    FileName = a.FileName,
+                    FilePath = a.FilePath,
+                    Uploader = new UserResponse
+                    {
+                        Login = a.Uploader.User.Login,
+                        UserId = a.Uploader.UserId
+                    },
+                })
+                .ToListAsync(ct);
+
+            return attachments;
+        }
+
+        public async Task<List<AttachmentResponse>?> GetAllTasksAttachments(int boardId, int userId, int taskId, CancellationToken ct)
+        {
+            if (!await IsUserBoardMemberAsync(boardId, userId, ct))
+                return null;
+
+            var attachments = await _db.Attachments
+                .Where(a => a.Task != null && a.TaskId == taskId && a.Task!.BoardId == boardId)
+                .Select(a => new AttachmentResponse 
+                {
+                    AttachmentId = a.AttachmentId,
+                    DateOfUpload = a.DateOfUpload,
+                    FileName = a.FileName,
+                    FilePath = a.FilePath,
+                    Uploader = new UserResponse
+                    {
+                        Login = a.Uploader.User.Login,
+                        UserId = a.Uploader.UserId
+                    },
+                })
+                .ToListAsync(ct);
+
+            return attachments;
+        }
+
+        public async Task<AttachmentResponse?> UploadAttachmentToTaskAsync(int boardId, int userId, int taskId, IFormFile file, CancellationToken ct)
         {
             if (!await IsUserBoardMemberAsync(boardId, userId, ct))
                 return null;
@@ -39,8 +86,7 @@ namespace KanbanBoard.Services
             return await SaveAttachmentAsync(uploader, taskId, null, file, ct);
         }
 
-        public async Task<AttachmentResponse?> UploadAttachmentToCommentAsync(
-            int boardId, int userId, int commentId, IFormFile file, CancellationToken ct)
+        public async Task<AttachmentResponse?> UploadAttachmentToCommentAsync(int boardId, int userId, int commentId, IFormFile file, CancellationToken ct)
         {
             if (!await IsUserBoardMemberAsync(boardId, userId, ct))
                 return null;
@@ -61,8 +107,7 @@ namespace KanbanBoard.Services
             return await SaveAttachmentAsync(uploader, null, commentId, file, ct);
         }
 
-        private async Task<AttachmentResponse?> SaveAttachmentAsync(
-            BoardUser uploader, int? taskId, int? commentId, IFormFile file, CancellationToken ct)
+        private async Task<AttachmentResponse?> SaveAttachmentAsync(BoardUser uploader, int? taskId, int? commentId, IFormFile file, CancellationToken ct)
         {
             var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "Storage", "Attachments");
             if (!Directory.Exists(uploadFolder))
