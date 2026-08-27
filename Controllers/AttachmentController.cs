@@ -84,5 +84,22 @@ namespace KanbanBoard.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Route("api/boards/{boardId}/attachments/{attachmentId}/download")]
+        public async Task<IActionResult> DownloadAttachment(int boardId, int attachmentId, CancellationToken ct)
+        {
+            var userId = GetUserId();
+
+            var result = await _attachmentService.DownloadAttachmentAsync(boardId, userId, attachmentId, ct);
+            if (result == null)
+                return NotFound();
+
+            var (stream, fileName, contentType) = result.Value;
+            return File(stream, contentType, fileName);
+        }
     }
 }

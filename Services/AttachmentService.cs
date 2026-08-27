@@ -19,6 +19,37 @@ namespace KanbanBoard.Services
             return await _db.BoardUsers.AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId, ct);
         }
 
+        public async Task<(Stream Stream, string FileName, string ContentType)?> DownloadAttachmentAsync(int boardId, int userId, int attachmentId, CancellationToken ct)
+        {
+            if (!await IsUserBoardMemberAsync(boardId, userId, ct))
+                return null;
+
+
+            var attachment = await _db.Attachments
+                .Include(a => a.Task)
+                .Include(a => a.Comment).ThenInclude(c => c.Task)
+                .FirstOrDefaultAsync(a => a.AttachmentId == attachmentId, ct);
+
+            if (attachment == null)
+                return null;
+
+            if (attachment.Task != null && attachment.Task.BoardId != boardId)
+                return null;
+            if (attachment.Comment != null && attachment.Comment.Task.BoardId != boardId)
+                return null;
+
+            var fullPath = Path.Combine(Directory.GetCurrentDirectory(), attachment.FilePath);
+            if (!File.Exists(fullPath))
+                return null;
+
+            var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read);
+
+            var contentType = "application/octet-stream";
+
+
+            return (stream, attachment.FileName, contentType);
+        }
+
         public async Task<List<AttachmentResponse>?> GetAllCommentsAttachments(int boardId, int userId, int commentId, CancellationToken ct)
         {
             if (!await IsUserBoardMemberAsync(boardId, userId, ct))
