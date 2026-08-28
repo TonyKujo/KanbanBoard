@@ -21,14 +21,15 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route ("api/boards/{boardId}/tasks")]
-
-        public async Task<IActionResult> GetAllBoardTasksAsync(int boardId, CancellationToken ct)
+        [Route("api/boards/{boardId}/tasks")]
+        public async Task<IActionResult> GetAllBoardTasksAsync(int boardId,  CancellationToken ct,  [FromQuery] int? statusId = null,  [FromQuery] string? search = null)
         {
-            int userId = GetUserId();
-            var result = await _taskService.GetAllBoardTasksAsync(boardId, userId, ct);
+            var userId = GetUserId();
+            var result = await _taskService.GetAllBoardTasksAsync(boardId, userId, ct, statusId, search);
+
             if (result == null)
                 return NotFound();
+
             return Ok(result);
         }
 

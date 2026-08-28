@@ -16,6 +16,85 @@ namespace KanbanBoard.Services
             _statusService = statusService;
         }
 
+        private async Task<bool> IsUserBoardMemberAsync(int boardId, int userId, CancellationToken ct)
+        {
+            return await _db.BoardUsers
+                .AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId, ct);
+
+
+        }
+
+        public async Task<UserResponse?> AddUserToBoardAsync(int boardId, int currentUserId, BoardUserRequest request, CancellationToken ct)
+        {
+            var board = await _db.Boards
+                .FirstOrDefaultAsync(b => b.BoardId == boardId && b.AuthorId == currentUserId, ct);
+            if (board == null)
+                return null;
+
+            var userToAdd = await _db.Users
+                .FirstOrDefaultAsync(u => u.Login == request.Login, ct);
+            if (userToAdd == null)
+                return null;
+
+            var alreadyExists = await _db.BoardUsers
+                .AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userToAdd.UserId, ct);
+            if (alreadyExists)
+                return null;
+
+            var boardUser = new BoardUser
+            {
+                BoardId = boardId,
+                UserId = userToAdd.UserId,
+                DateOfJoin = DateTime.UtcNow
+            };
+
+            _db.BoardUsers.Add(boardUser);
+            await _db.SaveChangesAsync(ct);
+
+            return new UserResponse
+            {
+                UserId = userToAdd.UserId,
+                Login = userToAdd.Login
+            };
+        }
+
+        public async Task<bool> RemoveUserFromBoardAsync(int boardId, int currentUserId, int userIdToRemove, CancellationToken ct)
+        {
+            var board = await _db.Boards
+                .FirstOrDefaultAsync(b => b.BoardId == boardId && b.AuthorId == currentUserId, ct);
+            if (board == null)
+                return false;
+
+            if (userIdToRemove == currentUserId)
+                return false;
+
+            var boardUserToDelete = await _db.BoardUsers
+                .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userIdToRemove, ct);
+            if (boardUserToDelete == null)
+                return false;
+
+            _db.BoardUsers.Remove(boardUserToDelete);
+            await _db.SaveChangesAsync(ct);
+
+            return true;
+        }
+
+        public async Task<List<UserResponse>?> GetBoardUsersAsync(int boardId, int userId, CancellationToken ct)
+        {
+            if(! await IsUserBoardMemberAsync(boardId, userId, ct))
+                return null;
+
+            var users = await _db.BoardUsers
+            .Where(bu => bu.BoardId == boardId)
+            .Select(bu => new UserResponse
+            {
+                Login = bu.User.Login,
+                UserId = bu.UserId,
+            })
+            .ToListAsync(ct);
+
+            return users;
+        }
 
         public async Task<BoardResponse?> UpdateBoardAsync(int boardId, int userId, BoardRequest boardRequest, CancellationToken ct)
         {
