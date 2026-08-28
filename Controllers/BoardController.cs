@@ -17,6 +17,24 @@ namespace KanbanBoard.Controllers
             return int.Parse(userIdClaim!);
         }
 
+
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Route("api/boards/{boardId}/users")]
+        public async Task<IActionResult> GetBoardUsers(int boardId, CancellationToken ct)
+        {
+            var userId = GetUserId();
+
+            var result = await _boardService.GetBoardUsersAsync(boardId, userId, ct);
+
+            if(result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
         [HttpPut]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -71,6 +89,38 @@ namespace KanbanBoard.Controllers
             var result = await _boardService.GetBoardAsync(boardId, userId, ct);
             if (result == null)
                 return NotFound();
+            return Ok(result);
+        }
+
+        [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Route("api/boards/{boardId}/users/{userId}")]
+        public async Task<IActionResult> RemoveBoardUser(int boardId, int userId, CancellationToken ct)
+        {
+            var currentUserId = GetUserId();
+            var result = await _boardService.RemoveUserFromBoardAsync(boardId, currentUserId, userId, ct);
+
+            if (!result)
+                return NotFound();
+
+            return NoContent();
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Route("api/boards/{boardId}/users")]
+        public async Task<IActionResult> AddBoardUser(int boardId, [FromBody] BoardUserRequest request, CancellationToken ct)
+        {
+            var userId = GetUserId();
+            var result = await _boardService.AddUserToBoardAsync(boardId, userId, request, ct);
+
+            if (result == null)
+                return NotFound();
+
             return Ok(result);
         }
 

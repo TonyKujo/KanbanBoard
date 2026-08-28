@@ -225,15 +225,26 @@ namespace KanbanBoard.Services
 
         }
 
-        public async Task<List<TaskResponse>?> GetAllBoardTasksAsync(int boardId, int userId, CancellationToken ct)
+        public async Task<List<TaskResponse>?> GetAllBoardTasksAsync(int boardId, int userId,  CancellationToken ct, int? statusId = null,  string? search = null)
         {
             if (!await IsUserBoardMemberAsync(boardId, userId, ct))
-            {
                 return null;
+
+            var query = _db.Tasks
+                .Where(t => t.BoardId == boardId);
+
+            if (statusId.HasValue)
+                query = query.Where(t => t.StatusId == statusId.Value);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var lowerSearch = search.ToLower();
+                query = query.Where(t =>
+                    t.TaskName.ToLower().Contains(lowerSearch) ||
+                    (t.TaskDescription != null && t.TaskDescription.ToLower().Contains(lowerSearch)));
             }
 
-            var tasks = await _db.Tasks
-                .Where(t => t.BoardId == boardId)
+            var tasks = await query
                 .Select(t => new TaskResponse
                 {
                     TaskId = t.TaskId,
@@ -256,7 +267,6 @@ namespace KanbanBoard.Services
                         UserId = t.Author.UserId,
                         Login = t.Author.User.Login,
                     }
-
                 })
                 .ToListAsync(ct);
 
