@@ -24,6 +24,17 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
             context.Response.Redirect(context.RedirectUri);
             return Task.CompletedTask;
         };
+
+        options.Events.OnRedirectToAccessDenied = context =>
+        {
+            if (context.Request.Path.StartsWithSegments("/api"))
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                return Task.CompletedTask;
+            }
+            context.Response.Redirect(context.RedirectUri);
+            return Task.CompletedTask;
+        };
     });
 
 builder.Services.AddAuthorization();
@@ -45,10 +56,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Мой API v1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "KanbanBoard API v1");
         c.InjectJavascript("/swagger-ui/custom.js");
     });
 }
+
+app.UseStaticFiles();
 
 app.UseRouting();
 
