@@ -51,8 +51,6 @@ namespace KanbanBoard.Data
             .HasIndex(bu => new { bu.UserId, bu.BoardId })
             .IsUnique();
 
-            modelBuilder.Entity<BoardUser>().HasQueryFilter(bu => !bu.IsDeleted);
-
             modelBuilder.Entity<Attachment>().ToTable(t => t
             .HasCheckConstraint(
                     "CK_Attachment_OneAttach",

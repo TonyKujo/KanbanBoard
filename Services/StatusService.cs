@@ -16,8 +16,7 @@ namespace KanbanBoard.Services
 
         private async Task<bool> IsUserBoardMemberAsync(int boardId, int userId, CancellationToken ct)
         {
-            return await _db.BoardUsers
-                .AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId, ct);
+            return await _db.BoardUsers.AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
         }
 
         public async Task<List<StatusResponse>?> GetBoardStatusesAsync(int boardId, int userId, CancellationToken ct)

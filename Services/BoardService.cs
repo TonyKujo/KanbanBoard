@@ -18,10 +18,7 @@ namespace KanbanBoard.Services
 
         private async Task<bool> IsUserBoardMemberAsync(int boardId, int userId, CancellationToken ct)
         {
-            return await _db.BoardUsers
-                .AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId, ct);
-
-
+            return await _db.BoardUsers.AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
         }
 
         public async Task<UserResponse?> AddUserToBoardAsync(int boardId, int currentUserId, BoardUserRequest request, CancellationToken ct)
@@ -37,7 +34,6 @@ namespace KanbanBoard.Services
                 return null;
 
             var existingBoardUser = await _db.BoardUsers
-                .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userToAdd.UserId, ct);
 
             if (existingBoardUser != null)
@@ -93,7 +89,7 @@ namespace KanbanBoard.Services
                 return null;
 
             var users = await _db.BoardUsers
-            .Where(bu => bu.BoardId == boardId)
+            .Where(bu => bu.BoardId == boardId && !bu.IsDeleted)
             .Select(bu => new UserResponse
             {
                 Login = bu.User.Login,
@@ -107,7 +103,9 @@ namespace KanbanBoard.Services
         public async Task<BoardResponse?> UpdateBoardAsync(int boardId, int userId, BoardRequest boardRequest, CancellationToken ct)
         {
             var board = await _db.Boards
-                .FirstOrDefaultAsync(b => b.BoardId == boardId && b.AuthorId == userId && b.BoardUsers.Any(bu => bu.UserId == userId), ct);
+                .FirstOrDefaultAsync(b => b.BoardId == boardId && b.AuthorId == userId
+                                        && b.BoardUsers.Any(bu => bu.UserId == userId && !bu.IsDeleted), ct);
+
 
             if (board is null)
                 return null;
@@ -131,7 +129,9 @@ namespace KanbanBoard.Services
         public async Task<bool> DeleteBoardAsync(int boardId, int userId, CancellationToken ct)
         {
             var board = await _db.Boards
-                .FirstOrDefaultAsync(b => b.BoardId == boardId && b.AuthorId == userId && b.BoardUsers.Any(bu => bu.UserId == userId), ct);
+                .FirstOrDefaultAsync(b => b.BoardId == boardId && b.AuthorId == userId
+                                        && b.BoardUsers.Any(bu => bu.UserId == userId && !bu.IsDeleted), ct);
+
             if (board is null)
                 return false;
 
@@ -146,7 +146,7 @@ namespace KanbanBoard.Services
         {
             var board = await _db.Boards
                 .Include(b => b.Author)
-                .FirstOrDefaultAsync(b => b.BoardId == boardId && b.BoardUsers.Any(bu => bu.UserId == userId), ct);
+                .FirstOrDefaultAsync(b => b.BoardId == boardId && b.BoardUsers.Any(bu => bu.UserId == userId && !bu.IsDeleted), ct);
 
             if (board is null)
                 return null;
@@ -200,7 +200,7 @@ namespace KanbanBoard.Services
         public async Task<List<BoardResponse>> GetAllUserBoardsAsync( int userId, CancellationToken ct) 
         {
             var boards = await _db.Boards
-            .Where(b => b.BoardUsers.Any(bu => bu.UserId == userId))
+            .Where(b => b.BoardUsers.Any(bu => bu.UserId == userId && !bu.IsDeleted))
             .Select(b => new BoardResponse
             {
                 BoardId = b.BoardId,

@@ -19,7 +19,7 @@ namespace KanbanBoard.Services
 
         private async Task<bool> IsUserBoardMemberAsync(int boardId, int userId, CancellationToken ct)
         {
-            return await _db.BoardUsers.AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId, ct);
+            return await _db.BoardUsers.AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
 
 
         }
@@ -35,7 +35,7 @@ namespace KanbanBoard.Services
                 return null;
 
             var authorFromThisBoard = await _db.BoardUsers
-                .FirstOrDefaultAsync(bu => bu.UserId == userId && bu.BoardId == boardId, ct);
+                .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
             if (authorFromThisBoard == null)
                 return null;
 
@@ -80,7 +80,7 @@ namespace KanbanBoard.Services
                 return false;
 
             var authorFromThisBoard = await _db.BoardUsers
-                .FirstOrDefaultAsync(bu => bu.UserId == userId && bu.BoardId == boardId, ct);
+                .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
             if (authorFromThisBoard == null)
                 return false;
 
@@ -111,7 +111,8 @@ namespace KanbanBoard.Services
                 return null;
             }
 
-            var authorFromThisBoard = await _db.BoardUsers.FirstOrDefaultAsync(bu => bu.UserId == userId && bu.BoardId == boardId, ct);
+
+            var authorFromThisBoard = await _db.BoardUsers.FirstOrDefaultAsync(bu => bu.UserId == userId && bu.BoardId == boardId && !bu.IsDeleted, ct);
 
             if (authorFromThisBoard == null)
                 return null;

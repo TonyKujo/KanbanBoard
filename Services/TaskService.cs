@@ -17,10 +17,9 @@ namespace KanbanBoard.Services
 
         private async Task<bool> IsUserBoardMemberAsync(int boardId, int userId, CancellationToken ct)
         {
-            return await _db.BoardUsers
-                .AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId, ct);
+            return await _db.BoardUsers.AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
 
-            
+
         }
 
         private async Task<bool> IsUserBoardOwnerAsync(int boardId, int userId, CancellationToken ct)
@@ -36,7 +35,7 @@ namespace KanbanBoard.Services
             }
 
             var workerFromThisBoard = await _db.BoardUsers
-            .FirstOrDefaultAsync(bu => bu.UserId == userId && bu.BoardId == boardId, ct);
+            .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
 
             if (workerFromThisBoard == null)
                 return null;
@@ -88,7 +87,7 @@ namespace KanbanBoard.Services
                 return false;
 
             var currentBoardUser = await _db.BoardUsers
-                .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userId, ct);
+                .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
             if (currentBoardUser is null)
                 return false;
 
@@ -107,24 +106,26 @@ namespace KanbanBoard.Services
         public async Task<TaskResponse?> UpdateTaskAsync(int boardId, int userId, int taskId, TaskRequest request, CancellationToken ct)
         {
             if (!await IsUserBoardMemberAsync(boardId, userId, ct))
-            {
                 return null;
-            }
 
-            var workerFromThisBoard = await _db.BoardUsers
-            .FirstOrDefaultAsync(bu => bu.UserId == request.WorkerId && bu.BoardId == boardId, ct);
-
-            if (workerFromThisBoard == null)
+            var currentBoardUser = await _db.BoardUsers
+                .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
+            if (currentBoardUser == null)
                 return null;
 
             var task = await _db.Tasks
-            .FirstOrDefaultAsync(t => t.TaskId == taskId && t.BoardId == boardId, ct);
+                .FirstOrDefaultAsync(t => t.TaskId == taskId && t.BoardId == boardId, ct);
+            if (task == null)
+                return null;
+            if (task.AuthorId != currentBoardUser.BoardUserId)
+                return null;
 
-            if (task is null)
+            var workerFromThisBoard = await _db.BoardUsers
+                .FirstOrDefaultAsync(bu => bu.UserId == request.WorkerId && bu.BoardId == boardId && !bu.IsDeleted, ct);
+            if (workerFromThisBoard == null)
                 return null;
 
             task.TaskName = request.TaskName;
-
             task.TaskDescription = request.TaskDescription;
             task.DeadLine = request.Deadline;
             task.Assignee = workerFromThisBoard;
@@ -132,10 +133,10 @@ namespace KanbanBoard.Services
             await _db.SaveChangesAsync(ct);
 
             var updatedTask = await _db.Tasks
-            .Include(t => t.Status)
-            .Include(t => t.Author).ThenInclude(bu => bu.User)
-            .Include(t => t.Assignee).ThenInclude(bu => bu.User)
-            .FirstAsync(t => t.TaskId == taskId, ct);
+                .Include(t => t.Status)
+                .Include(t => t.Author).ThenInclude(bu => bu.User)
+                .Include(t => t.Assignee).ThenInclude(bu => bu.User)
+                .FirstAsync(t => t.TaskId == taskId, ct);
 
             return new TaskResponse
             {
@@ -172,10 +173,10 @@ namespace KanbanBoard.Services
 
 
             var workerFromThisBoard = await _db.BoardUsers
-            .FirstOrDefaultAsync(bu => bu.UserId == request.WorkerId && bu.BoardId == boardId, ct);
+            .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
 
             var authorFromThisBoard = await _db.BoardUsers
-            .FirstOrDefaultAsync(bu => bu.UserId == userId && bu.BoardId == boardId, ct);
+            .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
 
             if (workerFromThisBoard == null || authorFromThisBoard == null)
                 return null;

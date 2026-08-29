@@ -3,6 +3,7 @@ using KanbanBoard.Models;
 using KanbanBoard.Models.Responses;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Mail;
+using System.Threading.Tasks;
 using Attachment = KanbanBoard.Models.Attachment;
 
 namespace KanbanBoard.Services
@@ -18,11 +19,18 @@ namespace KanbanBoard.Services
 
         private async Task<bool> IsUserBoardMemberAsync(int boardId, int userId, CancellationToken ct)
         {
-            return await _db.BoardUsers.AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId, ct);
+            return await _db.BoardUsers.AnyAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
+        }
+
+        private async Task<bool> IsUserBoardOwnerAsync(int boardId, int userId, CancellationToken ct)
+        {
+            return await _db.Boards.AnyAsync(b => b.BoardId == boardId && b.AuthorId == userId, ct);
         }
 
         public async Task<bool> DeleteAttachmentAsync(int boardId, int userId, int attachmentId, CancellationToken ct)
         {
+            bool isOwner = await IsUserBoardOwnerAsync(boardId, userId, ct);
+
             if (!await IsUserBoardMemberAsync(boardId, userId, ct))
                 return false;
 
@@ -41,17 +49,17 @@ namespace KanbanBoard.Services
 
             var uploader = await _db.BoardUsers
                 .Include(bu => bu.User)
-                .FirstOrDefaultAsync(bu => bu.UserId == userId && bu.BoardId == boardId, ct);
+                .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
 
             if (uploader == null)
                 return false;
 
 
 
-            if (AttachmentToDelete.Task != null && AttachmentToDelete.Task.AuthorId != uploader.BoardUserId)
-                return false;
+            bool isTaskAuthor = AttachmentToDelete.Task != null && AttachmentToDelete.Task.AuthorId == uploader.BoardUserId;
+            bool isCommentAuthor = AttachmentToDelete.Comment != null && AttachmentToDelete.Comment.AuthorId == uploader.BoardUserId;
 
-            if (AttachmentToDelete.Comment != null && AttachmentToDelete.Comment.AuthorId != uploader.BoardUserId)
+            if (!isOwner && !isTaskAuthor && !isCommentAuthor)
                 return false;
 
 
@@ -151,13 +159,21 @@ namespace KanbanBoard.Services
 
             var uploader = await _db.BoardUsers
                 .Include(bu => bu.User)
-                .FirstOrDefaultAsync(bu => bu.UserId == userId && bu.BoardId == boardId, ct);
+                .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
             if (uploader == null)
                 return null;
 
             var task = await _db.Tasks
                 .FirstOrDefaultAsync(t => t.TaskId == taskId && t.BoardId == boardId, ct);
-            if (task == null || task.AuthorId != uploader.BoardUserId)
+
+            if (task == null)
+                return null;
+
+            bool isOwner = await IsUserBoardOwnerAsync(boardId, userId, ct);
+            if (!isOwner && task.AuthorId != uploader.BoardUserId)
+                return null;
+
+            if (!isOwner && task.AuthorId != uploader.BoardUserId)
                 return null;
 
             return await SaveAttachmentAsync(uploader, taskId, null, file, ct);
@@ -170,16 +186,23 @@ namespace KanbanBoard.Services
 
             var uploader = await _db.BoardUsers
                 .Include(bu => bu.User)
-                .FirstOrDefaultAsync(bu => bu.UserId == userId && bu.BoardId == boardId, ct);
+                .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
             if (uploader == null)
                 return null;
 
             var comment = await _db.Comments
             .Include(c => c.Task)
             .FirstOrDefaultAsync(c => c.CommentId == commentId && c.Task.BoardId == boardId, ct);
-            if (comment == null || comment.AuthorId != uploader.BoardUserId)
-                return null; 
 
+            if (comment == null)
+                return null;
+
+            bool isOwner = await IsUserBoardOwnerAsync(boardId, userId, ct);
+            if (!isOwner && comment.AuthorId != uploader.BoardUserId)
+                return null;
+
+            if (!isOwner && comment.AuthorId != uploader.BoardUserId)
+                return null;
 
             return await SaveAttachmentAsync(uploader, null, commentId, file, ct);
         }
