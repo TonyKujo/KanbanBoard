@@ -170,11 +170,10 @@ namespace KanbanBoard.Services
                 return null;
 
             bool isOwner = await IsUserBoardOwnerAsync(boardId, userId, ct);
-            if (!isOwner && task.AuthorId != uploader.BoardUserId)
-                return null;
 
             if (!isOwner && task.AuthorId != uploader.BoardUserId)
                 return null;
+
 
             return await SaveAttachmentAsync(uploader, taskId, null, file, ct);
         }
@@ -198,11 +197,10 @@ namespace KanbanBoard.Services
                 return null;
 
             bool isOwner = await IsUserBoardOwnerAsync(boardId, userId, ct);
-            if (!isOwner && comment.AuthorId != uploader.BoardUserId)
-                return null;
 
             if (!isOwner && comment.AuthorId != uploader.BoardUserId)
                 return null;
+
 
             return await SaveAttachmentAsync(uploader, null, commentId, file, ct);
         }
