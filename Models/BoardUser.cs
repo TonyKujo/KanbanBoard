@@ -12,6 +12,7 @@ namespace KanbanBoard.Models
         [ForeignKey("Board")]
         public int BoardId { get; set; }
         public DateTime DateOfJoin { get; set; }
+        public bool IsDeleted { get; set; }
 
         public User User { get; set; } = null!;
         public Board Board { get; set; } = null!;

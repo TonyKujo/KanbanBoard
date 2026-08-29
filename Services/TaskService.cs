@@ -23,6 +23,11 @@ namespace KanbanBoard.Services
             
         }
 
+        private async Task<bool> IsUserBoardOwnerAsync(int boardId, int userId, CancellationToken ct)
+        {
+            return await _db.Boards.AnyAsync(b => b.BoardId == boardId && b.AuthorId == userId, ct);
+        }
+
         public async Task<StatusHistoryResponse?> ChangeTaskStatusAsync(int boardId, int userId, int taskId, StatusHistoryRequest request ,CancellationToken ct)
         {
             if (!await IsUserBoardMemberAsync(boardId, userId, ct))
@@ -75,12 +80,22 @@ namespace KanbanBoard.Services
         public async Task<bool> DeleteTaskAsync(int boardId, int userId, int taskId, CancellationToken ct)
         {
             if (!await IsUserBoardMemberAsync(boardId, userId, ct))
-            {
                 return false;
-            }
-            var taskToDelete = await _db.Tasks.FirstOrDefaultAsync(t => t.TaskId == taskId && t.BoardId == boardId, ct);
 
+            var taskToDelete = await _db.Tasks
+                .FirstOrDefaultAsync(t => t.TaskId == taskId && t.BoardId == boardId, ct);
             if (taskToDelete is null)
+                return false;
+
+            var currentBoardUser = await _db.BoardUsers
+                .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userId, ct);
+            if (currentBoardUser is null)
+                return false;
+
+            bool isAuthor = taskToDelete.AuthorId == currentBoardUser.BoardUserId;
+            bool isOwner = await IsUserBoardOwnerAsync(boardId, userId, ct);
+
+            if (!isAuthor && !isOwner)
                 return false;
 
             _db.Tasks.Remove(taskToDelete);

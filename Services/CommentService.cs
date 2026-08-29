@@ -24,6 +24,11 @@ namespace KanbanBoard.Services
 
         }
 
+        private async Task<bool> IsUserBoardOwnerAsync(int boardId, int userId, CancellationToken ct)
+        {
+            return await _db.Boards.AnyAsync(b => b.BoardId == boardId && b.AuthorId == userId, ct);
+        }
+
         public async Task<CommentResponse?> EditTaskCommentAsync( int boardId, int userId, int taskId, int commentId, CommentRequest request, CancellationToken ct)
         {
             if (!await IsUserBoardMemberAsync(boardId, userId, ct))
@@ -64,36 +69,36 @@ namespace KanbanBoard.Services
                 {
                     UserId = updatedComment.Author.UserId,
                     Login = updatedComment.Author.User.Login
-                }
+                },
+                IsEdited = updatedComment.IsEdited,
             };
         }
 
         public async Task<bool> DeleteCommentFromTaskAsync(int boardId, int userId, int taskId, int commentId, CancellationToken ct)
         {
             if (!await IsUserBoardMemberAsync(boardId, userId, ct))
-            {
                 return false;
-            }
 
-            var authorFromThisBoard = await _db.BoardUsers.FirstOrDefaultAsync(bu => bu.UserId == userId && bu.BoardId == boardId, ct);
-
+            var authorFromThisBoard = await _db.BoardUsers
+                .FirstOrDefaultAsync(bu => bu.UserId == userId && bu.BoardId == boardId, ct);
             if (authorFromThisBoard == null)
                 return false;
 
             var commentToDelete = await _db.Comments
-            .Include(c => c.Task)
-            .FirstOrDefaultAsync(c => c.CommentId == commentId
-                                     && c.TaskId == taskId
-                                     && c.Task.BoardId == boardId, ct);
-
+                .Include(c => c.Task)
+                .FirstOrDefaultAsync(c => c.CommentId == commentId
+                                        && c.TaskId == taskId
+                                        && c.Task.BoardId == boardId, ct);
             if (commentToDelete == null)
                 return false;
 
-            if (commentToDelete.AuthorId != authorFromThisBoard.BoardUserId)
+            bool isAuthor = commentToDelete.AuthorId == authorFromThisBoard.BoardUserId;
+            bool isOwner = await IsUserBoardOwnerAsync(boardId, userId, ct);
+
+            if (!isAuthor && !isOwner)
                 return false;
 
             _db.Comments.Remove(commentToDelete);
-
             await _db.SaveChangesAsync(ct);
 
             return true;
@@ -143,6 +148,7 @@ namespace KanbanBoard.Services
                     UserId = createdComment.Author.UserId,
                     Login = createdComment.Author.User.Login
                 },
+                IsEdited = createdComment.IsEdited,
             };
 
         }
@@ -161,7 +167,8 @@ namespace KanbanBoard.Services
                     Author = new UserResponse { Login = c.Author.User.Login, UserId = c.Author.UserId },
                     CommentId = c.CommentId,
                     MadeDate = c.DateOfMade,
-                    Text = c.Text
+                    Text = c.Text,
+                    IsEdited = c.IsEdited,
 
                 })
                 .ToListAsync(ct);

@@ -16,6 +16,33 @@ namespace KanbanBoard.Data
         public DbSet<Task> Tasks { get; set; }
         public DbSet<TaskStatusHistory> TaskStatusHistories { get; set; }
 
+        public override int SaveChanges()
+        {
+            DeleteAttachmentFiles();
+            return base.SaveChanges();
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            DeleteAttachmentFiles();
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+
+        private void DeleteAttachmentFiles()
+        {
+            var deletedAttachments = ChangeTracker.Entries<Attachment>()
+                .Where(e => e.State == EntityState.Deleted)
+                .Select(e => e.Entity)
+                .ToList();
+
+            foreach (var attachment in deletedAttachments)
+            {
+                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), attachment.FilePath);
+                if (File.Exists(fullPath))
+                    File.Delete(fullPath);
+            }
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -23,6 +50,8 @@ namespace KanbanBoard.Data
             modelBuilder.Entity<BoardUser>()
             .HasIndex(bu => new { bu.UserId, bu.BoardId })
             .IsUnique();
+
+            modelBuilder.Entity<BoardUser>().HasQueryFilter(bu => !bu.IsDeleted);
 
             modelBuilder.Entity<Attachment>().ToTable(t => t
             .HasCheckConstraint(
