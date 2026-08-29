@@ -21,7 +21,7 @@ namespace KanbanBoard.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Route("api/auth/login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest model, CancellationToken ct)
         {
@@ -29,7 +29,7 @@ namespace KanbanBoard.Controllers
 
             if (user == null)
             {
-                return Conflict("Такой логин отсутствует");
+                return Unauthorized("Неверный логин или пароль");
             }
 
             await SignInUser(user);
@@ -57,7 +57,9 @@ namespace KanbanBoard.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Route("api/auth/me")]
         public async Task<IActionResult> UserInfo(CancellationToken ct)
         {
@@ -65,15 +67,24 @@ namespace KanbanBoard.Controllers
 
             if (login == null)
             {
-                return BadRequest("Не поняли кто!");
+                return Unauthorized("Не авторизован");
             }
 
             var result = await _authService.GetUserInfo(login, ct);
+
+            if (result == null)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return Unauthorized("Не авторизован");
+            }
 
             return Ok(result);
         }
 
         [HttpPost]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Route("api/auth/logout")]
         public async Task<IActionResult> Logout()
         {

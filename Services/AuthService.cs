@@ -49,10 +49,14 @@ namespace KanbanBoard.Services
             return existingUser; 
         }
 
-        public async Task<GetUserInfoRespones> GetUserInfo(string login, CancellationToken ct)
+        public async Task<GetUserInfoRespones?> GetUserInfo(string login, CancellationToken ct)
         {
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.Login == login, ct)
-                       ?? throw new InvalidOperationException("Неверный логин!");
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Login == login, ct);
+
+            if (user is null)
+            {
+                return null;
+            }
 
             return new GetUserInfoRespones()
             {
