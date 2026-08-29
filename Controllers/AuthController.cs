@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace KanbanBoard.Controllers
 {
+    [ApiController]
     public class AuthController : Controller
     {
         private readonly AuthService _authService;

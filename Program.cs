@@ -1,12 +1,18 @@
 using KanbanBoard.Data;
 using KanbanBoard.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressMapClientErrors = true;
+});
 
 builder.Services.AddDbContext<KanbanBoardDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));

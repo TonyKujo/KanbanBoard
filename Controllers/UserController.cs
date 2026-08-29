@@ -5,6 +5,7 @@ using System.Security.Claims;
 
 namespace KanbanBoard.Controllers
 {
+    [ApiController]
     [Authorize]
     public class UserController(UserService userService) : Controller
     {
