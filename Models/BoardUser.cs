@@ -12,6 +12,7 @@ namespace KanbanBoard.Models
         [ForeignKey("Board")]
         public int BoardId { get; set; }
         public DateTime DateOfJoin { get; set; }
+        public bool IsDeleted { get; set; }
 
         public User User { get; set; } = null!;
         public Board Board { get; set; } = null!;
@@ -23,5 +24,8 @@ namespace KanbanBoard.Models
         public ICollection<Task> AuthoredTasks { get; set; } = new List<Task>();
         [InverseProperty("Assignee")]
         public ICollection<Task> AssignedTasks { get; set; } = new List<Task>();
+
+        [InverseProperty("Uploader")]
+        public ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
     }
 }

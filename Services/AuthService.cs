@@ -2,85 +2,63 @@
 using KanbanBoard.Models;
 using KanbanBoard.Models.Requests;
 using KanbanBoard.Models.Responses;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using Task = System.Threading.Tasks.Task;
 
 namespace KanbanBoard.Services
 {
     public class AuthService
     {
         private readonly KanbanBoardDbContext _db;
-        public AuthService(KanbanBoardDbContext dbContext) 
-        { 
-            _db = dbContext; 
+
+        public AuthService(KanbanBoardDbContext dbContext)
+        {
+            _db = dbContext;
         }
 
-        public async Task<AuthResponse> Register(RegisterRequest request, CancellationToken ct)
+        public async Task<User?> Register(RegisterRequest request, CancellationToken ct)
         {
             var existingUser = await _db.Users.FirstOrDefaultAsync(u => u.Login == request.Login, ct);
 
             if (existingUser is not null)
             {
-                throw new InvalidOperationException("Пользователь с таким логином уже существует!");
+                return null; 
             }
 
             var user = new User()
             {
                 Login = request.Login,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+                DateOfRegistration = DateTime.UtcNow
             };
 
             _db.Users.Add(user);
-
             await _db.SaveChangesAsync(ct);
 
-            return CreatePrincipal(user);
+            return user; 
         }
 
-        public async Task<AuthResponse> Login(LoginRequest request, CancellationToken ct) 
+        public async Task<User?> Login(LoginRequest request, CancellationToken ct)
         {
             var existingUser = await _db.Users.FirstOrDefaultAsync(u => u.Login == request.Login, ct);
 
-            if (existingUser is null || !BCrypt.Net.BCrypt.Verify(request.Password, existingUser.PasswordHash)) 
+            if (existingUser is null || !BCrypt.Net.BCrypt.Verify(request.Password, existingUser.PasswordHash))
             {
-                throw new InvalidOperationException("Неверный логин или пароль!");
-                
+                return null; 
             }
 
-            return CreatePrincipal(existingUser);
+            return existingUser; 
         }
 
-        public async Task<GetUserInfoRespones> GetUserInfo (string login, CancellationToken ct)
+        public async Task<GetUserInfoRespones> GetUserInfo(string login, CancellationToken ct)
         {
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.Login == login, ct) ?? throw new InvalidOperationException("Неверный логин!");
-        
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Login == login, ct)
+                       ?? throw new InvalidOperationException("Неверный логин!");
 
-            var userInfoResponse = new GetUserInfoRespones()
+            return new GetUserInfoRespones()
             {
                 UserId = user.UserId,
                 Login = user.Login,
                 DateOfRegistration = user.DateOfRegistration,
-            };
-
-            return userInfoResponse;
-        }
-
-        private static AuthResponse CreatePrincipal(User user)
-        {
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.Login)
-            };
-
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
-
-            return new AuthResponse
-            {
-                ClaimsPrincipal = principal,
             };
         }
     }

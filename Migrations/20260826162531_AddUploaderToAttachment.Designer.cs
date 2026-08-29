@@ -3,6 +3,7 @@ using System;
 using KanbanBoard.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KanbanBoard.Migrations
 {
     [DbContext(typeof(KanbanBoardDbContext))]
-    partial class KanbanBoardDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260826162531_AddUploaderToAttachment")]
+    partial class AddUploaderToAttachment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -109,9 +112,6 @@ namespace KanbanBoard.Migrations
 
                     b.Property<DateTime>("DateOfJoin")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
