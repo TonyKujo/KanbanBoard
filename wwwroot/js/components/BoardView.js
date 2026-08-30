@@ -1,13 +1,14 @@
 import { ref, computed, watch } from '/lib/vue.esm-browser.prod.js';
 import { S } from '/js/strings.js';
 import { api, LIMITS } from '/js/api.js';
-import { store, route, loadBoard, moveTask, applyTaskUpdate, pushToast } from '/js/store.js';
+import { store, route, loadBoard, moveTask, applyTaskUpdate, pushToast, openTask, closeTask } from '/js/store.js';
 import { initials, avatarStyle } from '/js/ui.js';
 import TaskColumn from '/js/components/TaskColumn.js';
+import TaskPanel from '/js/components/TaskPanel.js';
 
 export default {
     name: 'BoardView',
-    components: { TaskColumn },
+    components: { TaskColumn, TaskPanel },
     props: {
         boardId: { type: Number, required: true }
     },
@@ -19,6 +20,20 @@ export default {
         const fieldErrors = ref({});
 
         watch(() => props.boardId, (id) => { loadBoard(id); }, { immediate: true });
+
+        // Панель открывается по taskId из роута; при прямом заходе задача грузится отдельным запросом.
+        watch(() => route.taskId, (taskId) => {
+            if (taskId) openTask(props.boardId, taskId);
+            else closeTask();
+        }, { immediate: true });
+
+        // Доска догрузилась после deep-link — берём задачу из стора, чтобы панель и карточка были одним объектом.
+        watch(() => store.tasks.length, () => {
+            if (route.taskId && store.task && store.task.taskId === route.taskId) {
+                const local = store.tasks.find((t) => t.taskId === route.taskId);
+                if (local && local !== store.task) store.task = local;
+            }
+        });
 
         const firstStatusId = computed(() => (store.statuses.length ? store.statuses[0].statusId : null));
 
@@ -102,6 +117,8 @@ export default {
                             @create="openCreate" />
                 <div v-if="store.statuses.length === 0" class="kb-empty">{{ S.board.noColumns }}</div>
             </div>
+
+            <TaskPanel v-if="store.task" :key="store.task.taskId" :board-id="boardId" :task="store.task" />
 
             <div v-if="creating" class="kb-modal-overlay" @click.self="creating = false">
                 <div class="kb-modal">

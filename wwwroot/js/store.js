@@ -251,3 +251,36 @@ export async function moveTask(taskId, targetStatusId, position) {
         if (i >= 0) store.movingTaskIds.splice(i, 1);
     }
 }
+
+// --- Deep-link на задачу ---
+
+// Если доска уже загружена — берём задачу из стора. При прямом заходе/F5 — грузим отдельно,
+// не дожидаясь загрузки доски. 404 → тост + возврат на доску.
+export async function openTask(boardId, taskId) {
+    const local = store.tasks.find((t) => t.taskId === taskId);
+    if (local) {
+        store.task = local;
+        store.taskLoading = false;
+        return;
+    }
+
+    store.taskLoading = true;
+    store.task = null;
+    try {
+        store.task = await api.task(boardId, taskId);
+    } catch (e) {
+        if (e.status === 404) {
+            pushToast(S.errors.taskNotFound, 'error');
+            navigate('#/boards/' + boardId);
+        } else if (e.status !== 401) {
+            pushToast(e.message, 'error');
+        }
+    } finally {
+        store.taskLoading = false;
+    }
+}
+
+export function closeTask() {
+    store.task = null;
+    store.taskLoading = false;
+}
