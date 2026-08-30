@@ -1,14 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - KanbanBoard</title>
+    <script>
+        // Выставляем тему до загрузки модулей, чтобы не мигал светлый фон.
+        // 'system' (и любое другое значение) — атрибут не ставим, работает @@media prefers-color-scheme.
+        (function () {
+            try {
+                var t = localStorage.getItem('kb.theme');
+                if (t === 'dark' || t === 'light') {
+                    document.documentElement.setAttribute('data-theme', t);
+                }
+            } catch (e) { /* localStorage недоступен — остаёмся на системной теме */ }
+        })();
+    </script>
+    <link rel="stylesheet" href="/css/tokens.css" />
+    <link rel="stylesheet" href="/css/app.css" />
 </head>
 <body>
-    <main>
-        @RenderBody()
-    </main>
+    @RenderBody()
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
