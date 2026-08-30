@@ -117,8 +117,6 @@ namespace KanbanBoard.Services
                 .FirstOrDefaultAsync(t => t.TaskId == taskId && t.BoardId == boardId, ct);
             if (task == null)
                 return null;
-            if (task.AuthorId != currentBoardUser.BoardUserId)
-                return null;
 
             var workerFromThisBoard = await _db.BoardUsers
                 .FirstOrDefaultAsync(bu => bu.UserId == request.WorkerId && bu.BoardId == boardId && !bu.IsDeleted, ct);
