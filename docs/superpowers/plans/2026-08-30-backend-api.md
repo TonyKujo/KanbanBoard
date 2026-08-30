@@ -65,7 +65,7 @@
 **Сборка:**
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -5
+cd . && dotnet build 2>&1 | tail -5
 ```
 
 Ожидаемо: строка вида `Build succeeded.` и `0 Error(s)`.
@@ -73,7 +73,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | t
 **Перезапуск приложения (после каждого изменения кода):**
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && curl -s -o /dev/null -w "ping=%{http_code}\n" http://localhost:5110/
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && curl -s -o /dev/null -w "ping=%{http_code}\n" http://localhost:5110/
 ```
 
 Ожидаемо: `0 Error(s)` и `ping=200`.
@@ -95,7 +95,7 @@ curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/register -H "C
 ## Task 1: Program.cs — статика, Swagger, OnRedirectToAccessDenied
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Program.cs` (весь файл; строка 48 содержит битую в кодировке строку заголовка Swagger, поэтому файл переписывается целиком)
+- Modify: `./Program.cs` (весь файл; строка 48 содержит битую в кодировке строку заголовка Swagger, поэтому файл переписывается целиком)
 
 - [ ] Прочитать `Program.cs` целиком (Read), затем перезаписать (Write) следующим содержимым:
 
@@ -183,7 +183,7 @@ app.Run();
 - [ ] Проверка сборки и запуска:
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && curl -s -o /dev/null -w "ping=%{http_code}\n" http://localhost:5110/
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && curl -s -o /dev/null -w "ping=%{http_code}\n" http://localhost:5110/
 ```
 
 Ожидаемо: `0 Error(s)`, `ping=200`.
@@ -199,7 +199,7 @@ curl -s http://localhost:5110/swagger/index.html -o /dev/null -w "swagger=%{http
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Program.cs && git commit -m "Бек: раздача статики, заголовок Swagger и 403 для /api при отказе в доступе"
+cd . && git add Program.cs && git commit -m "Бек: раздача статики, заголовок Swagger и 403 для /api при отказе в доступе"
 ```
 
 ---
@@ -207,13 +207,13 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Program.cs &&
 ## Task 2: Валидация request-DTO
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Requests/BoardRequest.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Requests/BoardUserRequest.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Requests/CommentRequest.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Requests/LoginRequest.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Requests/RegisterRequest.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Requests/StatusHistoryRequest.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Requests/TaskRequest.cs`
+- Modify: `./Models/Requests/BoardRequest.cs`
+- Modify: `./Models/Requests/BoardUserRequest.cs`
+- Modify: `./Models/Requests/CommentRequest.cs`
+- Modify: `./Models/Requests/LoginRequest.cs`
+- Modify: `./Models/Requests/RegisterRequest.cs`
+- Modify: `./Models/Requests/StatusHistoryRequest.cs`
+- Modify: `./Models/Requests/TaskRequest.cs`
 
 - [ ] Перезаписать `Models/Requests/BoardRequest.cs`:
 
@@ -344,7 +344,7 @@ namespace KanbanBoard.Models.Requests
 - [ ] Проверка сборки:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -5
+cd . && dotnet build 2>&1 | tail -5
 ```
 
 Ожидаемо: `Build succeeded.`, `0 Error(s)`. (Атрибуты пока ничего не валидируют — `[ApiController]` включается в Task 3.)
@@ -352,7 +352,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | t
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Requests && git commit -m "Бек: атрибуты валидации на request-DTO"
+cd . && git add Models/Requests && git commit -m "Бек: атрибуты валидации на request-DTO"
 ```
 
 ---
@@ -360,14 +360,14 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Reques
 ## Task 3: `[ApiController]` на семи API-контроллерах
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Controllers/AuthController.cs` (строка 11)
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Controllers/BoardController.cs` (строка 9–10)
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Controllers/StatusController.cs` (строка 8–9)
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Controllers/TaskController.cs` (строка 9–10)
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Controllers/CommentController.cs` (строка 9–10)
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Controllers/AttachmentController.cs` (строка 8–9)
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Controllers/UserController.cs` (строка 8–9)
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Program.cs`
+- Modify: `./Controllers/AuthController.cs` (строка 11)
+- Modify: `./Controllers/BoardController.cs` (строка 9–10)
+- Modify: `./Controllers/StatusController.cs` (строка 8–9)
+- Modify: `./Controllers/TaskController.cs` (строка 9–10)
+- Modify: `./Controllers/CommentController.cs` (строка 9–10)
+- Modify: `./Controllers/AttachmentController.cs` (строка 8–9)
+- Modify: `./Controllers/UserController.cs` (строка 8–9)
+- Modify: `./Program.cs`
 
 `HomeController` НЕ трогаем — это MVC-контроллер без атрибутивного роутинга.
 
@@ -515,7 +515,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 - [ ] Проверка: перезапустить приложение и проверить, что валидация отдаёт 400 `ValidationProblemDetails`, а не 500:
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && curl -s -X POST http://localhost:5110/api/auth/register -H "Content-Type: application/json" -d '{"login":"","password":"123"}' -w "\nHTTP=%{http_code}\n"
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && curl -s -X POST http://localhost:5110/api/auth/register -H "Content-Type: application/json" -d '{"login":"","password":"123"}' -w "\nHTTP=%{http_code}\n"
 ```
 
 Ожидаемо: `HTTP=400`, в теле JSON с `"errors"`, внутри — ключи `Login` (обязательное поле) и `Password` (короче 6 символов).
@@ -531,7 +531,7 @@ curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/register -H "C
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Controllers Program.cs && git commit -m "Бек: [ApiController] на API-контроллерах, кривой ввод даёт 400 вместо 500"
+cd . && git add Controllers Program.cs && git commit -m "Бек: [ApiController] на API-контроллерах, кривой ввод даёт 400 вместо 500"
 ```
 
 ---
@@ -539,8 +539,8 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Controllers P
 ## Task 4: Auth — 401 вместо 409, `[Authorize]` на `/me` и `/logout`
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Controllers/AuthController.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Services/AuthService.cs` (метод `GetUserInfo`, строки 52–63)
+- Modify: `./Controllers/AuthController.cs`
+- Modify: `./Services/AuthService.cs` (метод `GetUserInfo`, строки 52–63)
 
 - [ ] В `Services/AuthService.cs` заменить метод `GetUserInfo` целиком:
 
@@ -698,7 +698,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Controllers P
 - [ ] Проверка: перезапустить приложение и прогнать сценарий:
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"wrongpass"}' -w "\nbadlogin=%{http_code}\n" ; curl -s http://localhost:5110/api/auth/me -o /dev/null -w "anonme=%{http_code}\n" ; curl -s -X POST http://localhost:5110/api/auth/logout -o /dev/null -w "anonlogout=%{http_code}\n"
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"wrongpass"}' -w "\nbadlogin=%{http_code}\n" ; curl -s http://localhost:5110/api/auth/me -o /dev/null -w "anonme=%{http_code}\n" ; curl -s -X POST http://localhost:5110/api/auth/logout -o /dev/null -w "anonlogout=%{http_code}\n"
 ```
 
 Ожидаемо: `badlogin=401` с телом `Неверный логин или пароль`, `anonme=401`, `anonlogout=401`.
@@ -714,7 +714,7 @@ curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/register -H "C
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Controllers/AuthController.cs Services/AuthService.cs && git commit -m "Бек: 401 на неверный логин, авторизация на /me и /logout, 401 на протухшую куку"
+cd . && git add Controllers/AuthController.cs Services/AuthService.cs && git commit -m "Бек: 401 на неверный логин, авторизация на /me и /logout, 401 на протухшую куку"
 ```
 
 ---
@@ -722,7 +722,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Controllers/A
 ## Task 5: Редактировать задачу может любой активный участник доски
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Services/TaskService.cs` (метод `UpdateTaskAsync`, строки 120–121)
+- Modify: `./Services/TaskService.cs` (метод `UpdateTaskAsync`, строки 120–121)
 
 - [ ] В `Services/TaskService.cs` в методе `UpdateTaskAsync` удалить проверку авторства. Заменить:
 
@@ -747,7 +747,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Controllers/A
 - [ ] Проверка: перезапустить приложение и убедиться, что PUT задачи от участника-не-автора возвращает 200. Скрипт создаёт вторую учётку, доску, задачу, добавляет второго участника и правит задачу от его имени:
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies /tmp/kb2.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/register -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null ; curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null ; curl -s -c /tmp/kb2.cookies -X POST http://localhost:5110/api/auth/register -H "Content-Type: application/json" -d '{"login":"kbtest2","password":"secret123"}' -o /dev/null ; curl -s -c /tmp/kb2.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest2","password":"secret123"}' -o /dev/null ; BOARD=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Права","description":"проверка"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; ME=$(curl -s -b /tmp/kb.cookies http://localhost:5110/api/auth/me | python3 -c "import sys,json;print(json.load(sys.stdin)['userId'])") ; curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$BOARD/users" -H "Content-Type: application/json" -d '{"login":"kbtest2"}' -o /dev/null -w "adduser=%{http_code}\n" ; TASK=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$BOARD/tasks" -H "Content-Type: application/json" -d "{\"taskName\":\"Задача\",\"taskDescription\":\"текст\",\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":$ME}" | python3 -c "import sys,json;print(json.load(sys.stdin)['taskId'])") ; echo "board=$BOARD task=$TASK" ; curl -s -b /tmp/kb2.cookies -X PUT "http://localhost:5110/api/boards/$BOARD/tasks/$TASK" -H "Content-Type: application/json" -d "{\"taskName\":\"Правка участником\",\"taskDescription\":\"ок\",\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":$ME}" -o /dev/null -w "put_by_member=%{http_code}\n"
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies /tmp/kb2.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/register -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null ; curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null ; curl -s -c /tmp/kb2.cookies -X POST http://localhost:5110/api/auth/register -H "Content-Type: application/json" -d '{"login":"kbtest2","password":"secret123"}' -o /dev/null ; curl -s -c /tmp/kb2.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest2","password":"secret123"}' -o /dev/null ; BOARD=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Права","description":"проверка"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; ME=$(curl -s -b /tmp/kb.cookies http://localhost:5110/api/auth/me | python3 -c "import sys,json;print(json.load(sys.stdin)['userId'])") ; curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$BOARD/users" -H "Content-Type: application/json" -d '{"login":"kbtest2"}' -o /dev/null -w "adduser=%{http_code}\n" ; TASK=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$BOARD/tasks" -H "Content-Type: application/json" -d "{\"taskName\":\"Задача\",\"taskDescription\":\"текст\",\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":$ME}" | python3 -c "import sys,json;print(json.load(sys.stdin)['taskId'])") ; echo "board=$BOARD task=$TASK" ; curl -s -b /tmp/kb2.cookies -X PUT "http://localhost:5110/api/boards/$BOARD/tasks/$TASK" -H "Content-Type: application/json" -d "{\"taskName\":\"Правка участником\",\"taskDescription\":\"ок\",\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":$ME}" -o /dev/null -w "put_by_member=%{http_code}\n"
 ```
 
 Ожидаемо: `adduser=200`, строка `board=… task=…` с числами, `put_by_member=200`.
@@ -755,7 +755,7 @@ pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltk
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Services/TaskService.cs && git commit -m "Бек: задачу может редактировать любой активный участник доски"
+cd . && git add Services/TaskService.cs && git commit -m "Бек: задачу может редактировать любой активный участник доски"
 ```
 
 ---
@@ -763,7 +763,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Services/Task
 ## Task 6: Комментарии скоупятся по boardId
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Services/CommentService.cs` (метод `GetAllCommentsOfTaskAsync`, строки 157–178)
+- Modify: `./Services/CommentService.cs` (метод `GetAllCommentsOfTaskAsync`, строки 157–178)
 
 - [ ] В `Services/CommentService.cs` заменить начало метода `GetAllCommentsOfTaskAsync`:
 
@@ -800,7 +800,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Services/Task
 - [ ] Проверка: перезапустить приложение и убедиться, что чужая задача по перебору `taskId` даёт 404. Скрипт создаёт две доски одним пользователем, задачу во второй доске и пытается прочитать её комментарии через первую доску:
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; ME=$(curl -s -b /tmp/kb.cookies http://localhost:5110/api/auth/me | python3 -c "import sys,json;print(json.load(sys.stdin)['userId'])") ; B1=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Доска А","description":"a"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; B2=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Доска Б","description":"b"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; T2=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B2/tasks" -H "Content-Type: application/json" -d "{\"taskName\":\"Чужая\",\"taskDescription\":null,\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":$ME}" | python3 -c "import sys,json;print(json.load(sys.stdin)['taskId'])") ; echo "b1=$B1 b2=$B2 t2=$T2" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B1/tasks/$T2/comments" -o /dev/null -w "cross_board=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B2/tasks/$T2/comments" -o /dev/null -w "own_board=%{http_code}\n"
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; ME=$(curl -s -b /tmp/kb.cookies http://localhost:5110/api/auth/me | python3 -c "import sys,json;print(json.load(sys.stdin)['userId'])") ; B1=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Доска А","description":"a"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; B2=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Доска Б","description":"b"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; T2=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B2/tasks" -H "Content-Type: application/json" -d "{\"taskName\":\"Чужая\",\"taskDescription\":null,\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":$ME}" | python3 -c "import sys,json;print(json.load(sys.stdin)['taskId'])") ; echo "b1=$B1 b2=$B2 t2=$T2" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B1/tasks/$T2/comments" -o /dev/null -w "cross_board=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B2/tasks/$T2/comments" -o /dev/null -w "own_board=%{http_code}\n"
 ```
 
 Ожидаемо: `cross_board=404`, `own_board=200`.
@@ -808,7 +808,7 @@ pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltk
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Services/CommentService.cs && git commit -m "Бек: комментарии задачи скоупятся по доске"
+cd . && git add Services/CommentService.cs && git commit -m "Бек: комментарии задачи скоупятся по доске"
 ```
 
 ---
@@ -816,7 +816,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Services/Comm
 ## Task 7: `Author.Login` в списке досок, создании и обновлении
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Services/BoardService.cs` (методы `UpdateBoardAsync` 103–126, `CreateBoardAsync` 167–199, `GetAllUserBoardsAsync` 200–215)
+- Modify: `./Services/BoardService.cs` (методы `UpdateBoardAsync` 103–126, `CreateBoardAsync` 167–199, `GetAllUserBoardsAsync` 200–215)
 
 - [ ] В `Services/BoardService.cs` заменить метод `UpdateBoardAsync` целиком:
 
@@ -987,7 +987,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Services/Comm
 - [ ] Проверка: перезапустить приложение и убедиться, что логин автора приходит во всех трёх ответах:
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Автор","description":"проверка логина"}' | python3 -c "import sys,json;d=json.load(sys.stdin);print(d['boardId'],d['author']['login'])") ; echo "create=$B" ; curl -s -b /tmp/kb.cookies http://localhost:5110/api/boards | python3 -c "import sys,json;print('list_logins=',set(b['author']['login'] for b in json.load(sys.stdin)))" ; BID=$(echo $B | cut -d' ' -f1) ; curl -s -b /tmp/kb.cookies -X PUT "http://localhost:5110/api/boards/$BID" -H "Content-Type: application/json" -d '{"name":"Автор 2","description":"проверка логина"}' | python3 -c "import sys,json;print('update_login=',json.load(sys.stdin)['author']['login'])"
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Автор","description":"проверка логина"}' | python3 -c "import sys,json;d=json.load(sys.stdin);print(d['boardId'],d['author']['login'])") ; echo "create=$B" ; curl -s -b /tmp/kb.cookies http://localhost:5110/api/boards | python3 -c "import sys,json;print('list_logins=',set(b['author']['login'] for b in json.load(sys.stdin)))" ; BID=$(echo $B | cut -d' ' -f1) ; curl -s -b /tmp/kb.cookies -X PUT "http://localhost:5110/api/boards/$BID" -H "Content-Type: application/json" -d '{"name":"Автор 2","description":"проверка логина"}' | python3 -c "import sys,json;print('update_login=',json.load(sys.stdin)['author']['login'])"
 ```
 
 Ожидаемо: `create=<id> kbtest`, `list_logins= {'kbtest'}` (без `None`), `update_login= kbtest`.
@@ -995,7 +995,7 @@ pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltk
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Services/BoardService.cs && git commit -m "Бек: логин автора доски заполняется в списке, создании и обновлении"
+cd . && git add Services/BoardService.cs && git commit -m "Бек: логин автора доски заполняется в списке, создании и обновлении"
 ```
 
 ---
@@ -1003,8 +1003,8 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Services/Boar
 ## Task 8: `AttachmentResponse` без `FilePath`
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Responses/AttachmentResponse.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Services/AttachmentService.cs` (строки 119, 143, 240)
+- Modify: `./Models/Responses/AttachmentResponse.cs`
+- Modify: `./Services/AttachmentService.cs` (строки 119, 143, 240)
 
 - [ ] Перезаписать `Models/Responses/AttachmentResponse.cs`:
 
@@ -1109,7 +1109,7 @@ namespace KanbanBoard.Models.Responses
 - [ ] Проверка: перезапустить приложение, загрузить файл в задачу и убедиться, что `filePath` не приходит:
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && echo "привет" > /tmp/kb-file.txt && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; ME=$(curl -s -b /tmp/kb.cookies http://localhost:5110/api/auth/me | python3 -c "import sys,json;print(json.load(sys.stdin)['userId'])") ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Вложения","description":"проверка"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; T=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d "{\"taskName\":\"Файл\",\"taskDescription\":null,\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":$ME}" | python3 -c "import sys,json;print(json.load(sys.stdin)['taskId'])") ; curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks/$T/attachments" -F "file=@/tmp/kb-file.txt" -w "\nupload=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks/$T/attachments"
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && echo "привет" > /tmp/kb-file.txt && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; ME=$(curl -s -b /tmp/kb.cookies http://localhost:5110/api/auth/me | python3 -c "import sys,json;print(json.load(sys.stdin)['userId'])") ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Вложения","description":"проверка"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; T=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d "{\"taskName\":\"Файл\",\"taskDescription\":null,\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":$ME}" | python3 -c "import sys,json;print(json.load(sys.stdin)['taskId'])") ; curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks/$T/attachments" -F "file=@/tmp/kb-file.txt" -w "\nupload=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks/$T/attachments"
 ```
 
 Ожидаемо: `upload=200`; в теле ответа на загрузку и в списке есть `attachmentId`, `fileName`, `dateOfUpload`, `uploader` и НЕТ ключа `filePath`.
@@ -1117,7 +1117,7 @@ pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltk
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Responses/AttachmentResponse.cs Services/AttachmentService.cs && git commit -m "Бек: AttachmentResponse больше не отдаёт серверный путь к файлу"
+cd . && git add Models/Responses/AttachmentResponse.cs Services/AttachmentService.cs && git commit -m "Бек: AttachmentResponse больше не отдаёт серверный путь к файлу"
 ```
 
 ---
@@ -1127,10 +1127,10 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Respon
 ## Task 9: Поля `Order` и миграция `AddOrdering`
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Status.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Task.cs`
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Migrations/<timestamp>_AddOrdering.cs` (+ `.Designer.cs`, генерируются `dotnet ef`)
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Migrations/KanbanBoardDbContextModelSnapshot.cs` (обновляется `dotnet ef`)
+- Modify: `./Models/Status.cs`
+- Modify: `./Models/Task.cs`
+- Create: `./Migrations/<timestamp>_AddOrdering.cs` (+ `.Designer.cs`, генерируются `dotnet ef`)
+- Modify: `./Migrations/KanbanBoardDbContextModelSnapshot.cs` (обновляется `dotnet ef`)
 
 - [ ] Перезаписать `Models/Status.cs`:
 
@@ -1218,7 +1218,7 @@ dotnet ef --version || dotnet tool install --global dotnet-ef
 - [ ] Остановить приложение и сгенерировать миграцию (файлы `.cs` и `.Designer.cs` пишет EF, руками их не создаём):
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet ef migrations add AddOrdering 2>&1 | tail -10
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet ef migrations add AddOrdering 2>&1 | tail -10
 ```
 
 Ожидаемо: `Build started...`, `Build succeeded.`, `Done. To undo this action, use 'ef migrations remove'`. Появились файлы `Migrations/<timestamp>_AddOrdering.cs` и `Migrations/<timestamp>_AddOrdering.Designer.cs`.
@@ -1226,7 +1226,7 @@ pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltk
 - [ ] Найти сгенерированный файл и прочитать его:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && ls Migrations/*AddOrdering.cs && cat Migrations/*_AddOrdering.cs
+cd . && ls Migrations/*AddOrdering.cs && cat Migrations/*_AddOrdering.cs
 ```
 
 Ожидаемо: в `Up()` два вызова `migrationBuilder.AddColumn<int>` — для таблицы `Statuses` и `Tasks`, оба с `name: "Order"`, `nullable: false`, `defaultValue: 0`; в `Down()` — два `DropColumn`. Если `AddColumn` только один или имена колонок другие — остановиться и разобраться (модели не сохранились / миграция взяла старый снапшот).
@@ -1262,7 +1262,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && ls Migrations/*AddOrd
 - [ ] Применить миграцию:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet ef database update 2>&1 | tail -10
+cd . && dotnet ef database update 2>&1 | tail -10
 ```
 
 Ожидаемо: `Applying migration '<timestamp>_AddOrdering'.` и `Done.`
@@ -1270,7 +1270,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet ef database up
 - [ ] Проверка: перезапустить приложение и убедиться, что колонки существующей доски получили разные `Order` (пока сериализуется как поле сущности только внутри бека — проверяем через список задач и колонок после Task 10; сейчас достаточно, что приложение стартует и читает данные):
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; curl -s -b /tmp/kb.cookies http://localhost:5110/api/boards | python3 -c "import sys,json;d=json.load(sys.stdin);print('boards=',len(d))"
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; curl -s -b /tmp/kb.cookies http://localhost:5110/api/boards | python3 -c "import sys,json;d=json.load(sys.stdin);print('boards=',len(d))"
 ```
 
 Ожидаемо: `login=200`, `boards=` число больше нуля, приложение не падает.
@@ -1278,7 +1278,7 @@ pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltk
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Status.cs Models/Task.cs Migrations && git commit -m "Бек: миграция AddOrdering — порядок колонок и карточек с бекфиллом"
+cd . && git add Models/Status.cs Models/Task.cs Migrations && git commit -m "Бек: миграция AddOrdering — порядок колонок и карточек с бекфиллом"
 ```
 
 ---
@@ -1286,8 +1286,8 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Status
 ## Task 10: `StatusResponse.Order`, сортировка колонок и дефолтные колонки
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Responses/StatusResponse.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Services/StatusService.cs` (методы `GetBoardStatusesAsync`, `CreateDefaultStatusesAsync`)
+- Modify: `./Models/Responses/StatusResponse.cs`
+- Modify: `./Services/StatusService.cs` (методы `GetBoardStatusesAsync`, `CreateDefaultStatusesAsync`)
 
 - [ ] Перезаписать `Models/Responses/StatusResponse.cs`:
 
@@ -1357,7 +1357,7 @@ namespace KanbanBoard.Models.Responses
 - [ ] Проверка: перезапустить приложение, создать доску и посмотреть колонки:
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Колонки","description":"порядок"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; echo "board=$B" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses"
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Колонки","description":"порядок"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; echo "board=$B" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses"
 ```
 
 Ожидаемо: тело вида `[{"statusId":N,"statusName":"To Do","order":0},{"statusId":N+1,"statusName":"In Progress","order":1},{"statusId":N+2,"statusName":"Done","order":2}]`.
@@ -1365,7 +1365,7 @@ pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltk
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Responses/StatusResponse.cs Services/StatusService.cs && git commit -m "Бек: колонки отдают порядок и сортируются по (Order, StatusId)"
+cd . && git add Models/Responses/StatusResponse.cs Services/StatusService.cs && git commit -m "Бек: колонки отдают порядок и сортируются по (Order, StatusId)"
 ```
 
 ---
@@ -1373,8 +1373,8 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Respon
 ## Task 11: Итоговая форма `TaskResponse` и общая проекция задач
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Responses/TaskResponse.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Services/TaskService.cs` (шапка файла, метод `GetAllBoardTasksAsync`)
+- Modify: `./Models/Responses/TaskResponse.cs`
+- Modify: `./Services/TaskService.cs` (шапка файла, метод `GetAllBoardTasksAsync`)
 
 - [ ] Перезаписать `Models/Responses/TaskResponse.cs`:
 
@@ -1526,7 +1526,7 @@ namespace KanbanBoard.Services
 - [ ] Проверка сборки (в `CreateTaskAsync`/`UpdateTaskAsync` ещё осталась старая ручная проекция — она использует `Worker = new UserResponse {...}`, что по-прежнему компилируется, потому что `Worker` теперь `UserResponse?`):
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -5
+cd . && dotnet build 2>&1 | tail -5
 ```
 
 Ожидаемо: `Build succeeded.`, `0 Error(s)`.
@@ -1534,7 +1534,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | t
 - [ ] Проверка списка задач: перезапустить приложение и посмотреть форму ответа:
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; ME=$(curl -s -b /tmp/kb.cookies http://localhost:5110/api/auth/me | python3 -c "import sys,json;print(json.load(sys.stdin)['userId'])") ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Форма задачи","description":"dto"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d "{\"taskName\":\"Первая\",\"taskDescription\":\"описание\",\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":$ME}" -o /dev/null -w "create=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks"
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; ME=$(curl -s -b /tmp/kb.cookies http://localhost:5110/api/auth/me | python3 -c "import sys,json;print(json.load(sys.stdin)['userId'])") ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Форма задачи","description":"dto"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d "{\"taskName\":\"Первая\",\"taskDescription\":\"описание\",\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":$ME}" -o /dev/null -w "create=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks"
 ```
 
 Ожидаемо: `create=200`; в списке один объект, у него есть ключи `taskId`, `boardId`, `taskName`, `taskDescription`, `deadline`, `dateOfMade`, `order`, `status` (с `order`), `worker`, `author`, `commentsCount` (=0), `attachmentsCount` (=0).
@@ -1542,7 +1542,7 @@ pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltk
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Responses/TaskResponse.cs Services/TaskService.cs && git commit -m "Бек: итоговая форма TaskResponse и общая проекция задач с сортировкой"
+cd . && git add Models/Responses/TaskResponse.cs Services/TaskService.cs && git commit -m "Бек: итоговая форма TaskResponse и общая проекция задач с сортировкой"
 ```
 
 ---
@@ -1550,8 +1550,8 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Respon
 ## Task 12: Создание и обновление задачи — `WorkerId`, опциональный исполнитель, `Order`, первая строка истории
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Requests/TaskRequest.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Services/TaskService.cs` (методы `CreateTaskAsync`, `UpdateTaskAsync`)
+- Modify: `./Models/Requests/TaskRequest.cs`
+- Modify: `./Services/TaskService.cs` (методы `CreateTaskAsync`, `UpdateTaskAsync`)
 
 - [ ] Перезаписать `Models/Requests/TaskRequest.cs`:
 
@@ -1685,7 +1685,7 @@ namespace KanbanBoard.Models.Requests
 - [ ] Проверка: перезапустить приложение и прогнать четыре сценария — задача с исполнителем, задача без исполнителя, снятие исполнителя через PUT, чужой `WorkerId` → 404:
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies /tmp/kb2.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; curl -s -c /tmp/kb2.cookies -X POST http://localhost:5110/api/auth/register -H "Content-Type: application/json" -d '{"login":"kbtest2","password":"secret123"}' -o /dev/null ; ME=$(curl -s -b /tmp/kb.cookies http://localhost:5110/api/auth/me | python3 -c "import sys,json;print(json.load(sys.stdin)['userId'])") ; curl -s -c /tmp/kb2.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest2","password":"secret123"}' -o /dev/null ; OTHER=$(curl -s -b /tmp/kb2.cookies http://localhost:5110/api/auth/me | python3 -c "import sys,json;print(json.load(sys.stdin)['userId'])") ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Исполнители","description":"проверка"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; echo "board=$B me=$ME other=$OTHER" ; curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d "{\"taskName\":\"С исполнителем\",\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":$ME}" | python3 -c "import sys,json;d=json.load(sys.stdin);print('with_worker order=',d['order'],'worker=',d['worker'])" ; T=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d '{"taskName":"Без исполнителя","deadline":"2026-12-31T12:00:00Z","workerId":null}' | python3 -c "import sys,json;d=json.load(sys.stdin);print(d['taskId'],'no_worker order=',d['order'],'worker=',d['worker'],file=sys.stderr);print(d['taskId'])") ; curl -s -b /tmp/kb.cookies -X PUT "http://localhost:5110/api/boards/$B/tasks/$T" -H "Content-Type: application/json" -d "{\"taskName\":\"Снимаем исполнителя\",\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":null}" | python3 -c "import sys,json;print('put_null_worker=',json.load(sys.stdin)['worker'])" ; curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d "{\"taskName\":\"Чужой исполнитель\",\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":$OTHER}" -o /dev/null -w "alien_worker=%{http_code}\n"
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies /tmp/kb2.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; curl -s -c /tmp/kb2.cookies -X POST http://localhost:5110/api/auth/register -H "Content-Type: application/json" -d '{"login":"kbtest2","password":"secret123"}' -o /dev/null ; ME=$(curl -s -b /tmp/kb.cookies http://localhost:5110/api/auth/me | python3 -c "import sys,json;print(json.load(sys.stdin)['userId'])") ; curl -s -c /tmp/kb2.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest2","password":"secret123"}' -o /dev/null ; OTHER=$(curl -s -b /tmp/kb2.cookies http://localhost:5110/api/auth/me | python3 -c "import sys,json;print(json.load(sys.stdin)['userId'])") ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Исполнители","description":"проверка"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; echo "board=$B me=$ME other=$OTHER" ; curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d "{\"taskName\":\"С исполнителем\",\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":$ME}" | python3 -c "import sys,json;d=json.load(sys.stdin);print('with_worker order=',d['order'],'worker=',d['worker'])" ; T=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d '{"taskName":"Без исполнителя","deadline":"2026-12-31T12:00:00Z","workerId":null}' | python3 -c "import sys,json;d=json.load(sys.stdin);print(d['taskId'],'no_worker order=',d['order'],'worker=',d['worker'],file=sys.stderr);print(d['taskId'])") ; curl -s -b /tmp/kb.cookies -X PUT "http://localhost:5110/api/boards/$B/tasks/$T" -H "Content-Type: application/json" -d "{\"taskName\":\"Снимаем исполнителя\",\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":null}" | python3 -c "import sys,json;print('put_null_worker=',json.load(sys.stdin)['worker'])" ; curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d "{\"taskName\":\"Чужой исполнитель\",\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":$OTHER}" -o /dev/null -w "alien_worker=%{http_code}\n"
 ```
 
 Ожидаемо: `with_worker order= 0 worker= {'userId': …, 'login': 'kbtest'}`, во второй строке (stderr) `no_worker order= 1 worker= None`, `put_null_worker= None`, `alien_worker=404`.
@@ -1695,7 +1695,7 @@ pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltk
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Requests/TaskRequest.cs Services/TaskService.cs && git commit -m "Бек: задача создаётся с исполнителем из запроса, опциональным исполнителем, порядком и первой строкой истории"
+cd . && git add Models/Requests/TaskRequest.cs Services/TaskService.cs && git commit -m "Бек: задача создаётся с исполнителем из запроса, опциональным исполнителем, порядком и первой строкой истории"
 ```
 
 ---
@@ -1703,8 +1703,8 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Reques
 ## Task 13: `GET /api/boards/{boardId}/tasks/{taskId}`
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Services/TaskService.cs` (новый метод `GetBoardTaskAsync`)
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Controllers/TaskController.cs` (новый экшен)
+- Modify: `./Services/TaskService.cs` (новый метод `GetBoardTaskAsync`)
+- Modify: `./Controllers/TaskController.cs` (новый экшен)
 
 - [ ] В `Services/TaskService.cs` добавить метод сразу перед `GetAllBoardTasksAsync`. Заменить:
 
@@ -1768,7 +1768,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Reques
 - [ ] Проверка: перезапустить приложение и прогнать три сценария — своя задача, чужая доска (скоупинг по `boardId`), неавторизованный:
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; B1=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"GET A","description":"a"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; B2=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"GET Б","description":"b"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; T=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B2/tasks" -H "Content-Type: application/json" -d '{"taskName":"Одна задача","deadline":"2026-12-31T12:00:00Z","workerId":null}' | python3 -c "import sys,json;print(json.load(sys.stdin)['taskId'])") ; echo "b1=$B1 b2=$B2 t=$T" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B2/tasks/$T" -w "\nown=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B1/tasks/$T" -o /dev/null -w "cross_board=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B2/tasks/99999999" -o /dev/null -w "missing=%{http_code}\n" ; curl -s "http://localhost:5110/api/boards/$B2/tasks/$T" -o /dev/null -w "anon=%{http_code}\n"
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; B1=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"GET A","description":"a"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; B2=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"GET Б","description":"b"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; T=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B2/tasks" -H "Content-Type: application/json" -d '{"taskName":"Одна задача","deadline":"2026-12-31T12:00:00Z","workerId":null}' | python3 -c "import sys,json;print(json.load(sys.stdin)['taskId'])") ; echo "b1=$B1 b2=$B2 t=$T" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B2/tasks/$T" -w "\nown=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B1/tasks/$T" -o /dev/null -w "cross_board=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B2/tasks/99999999" -o /dev/null -w "missing=%{http_code}\n" ; curl -s "http://localhost:5110/api/boards/$B2/tasks/$T" -o /dev/null -w "anon=%{http_code}\n"
 ```
 
 Ожидаемо: `own=200` и в теле объект `TaskResponse` с `"worker":null`, `cross_board=404`, `missing=404`, `anon=401`.
@@ -1776,7 +1776,7 @@ pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltk
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Services/TaskService.cs Controllers/TaskController.cs && git commit -m "Бек: GET одной задачи со скоупингом по доске"
+cd . && git add Services/TaskService.cs Controllers/TaskController.cs && git commit -m "Бек: GET одной задачи со скоупингом по доске"
 ```
 
 ---
@@ -1784,9 +1784,9 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Services/Task
 ## Task 14: История статусов — `GET .../history` и порядок в старом `PATCH .../status`
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Responses/StatusHistoryResponse.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Services/TaskService.cs` (метод `ChangeTaskStatusAsync`, новый метод `GetTaskHistoryAsync`)
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Controllers/TaskController.cs` (новый экшен)
+- Modify: `./Models/Responses/StatusHistoryResponse.cs`
+- Modify: `./Services/TaskService.cs` (метод `ChangeTaskStatusAsync`, новый метод `GetTaskHistoryAsync`)
+- Modify: `./Controllers/TaskController.cs` (новый экшен)
 
 - [ ] Перезаписать `Models/Responses/StatusHistoryResponse.cs`:
 
@@ -1954,7 +1954,7 @@ namespace KanbanBoard.Models.Responses
 - [ ] Проверка: перезапустить приложение, создать задачу (первая строка истории), перевести её в другую колонку старым `PATCH .../status` и прочитать историю:
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"История","description":"h"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; S2=$(curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses" | python3 -c "import sys,json;print(json.load(sys.stdin)[1]['statusId'])") ; T=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d '{"taskName":"История задачи","deadline":"2026-12-31T12:00:00Z","workerId":null}' | python3 -c "import sys,json;print(json.load(sys.stdin)['taskId'])") ; echo "board=$B status2=$S2 task=$T" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks/$T/history" | python3 -c "import sys,json;d=json.load(sys.stdin);print('history_after_create=',len(d),d[0]['status']['statusName'],d[0]['author']['login'])" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/tasks/$T/status" -H "Content-Type: application/json" -d "{\"newStatusId\":$S2}" -w "\npatch=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks/$T/history" | python3 -c "import sys,json;d=json.load(sys.stdin);print('history_after_patch=',len(d),[h['status']['statusName'] for h in d])" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks/$T" | python3 -c "import sys,json;d=json.load(sys.stdin);print('task_after_patch status=',d['status']['statusName'],'order=',d['order'])"
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"История","description":"h"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; S2=$(curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses" | python3 -c "import sys,json;print(json.load(sys.stdin)[1]['statusId'])") ; T=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d '{"taskName":"История задачи","deadline":"2026-12-31T12:00:00Z","workerId":null}' | python3 -c "import sys,json;print(json.load(sys.stdin)['taskId'])") ; echo "board=$B status2=$S2 task=$T" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks/$T/history" | python3 -c "import sys,json;d=json.load(sys.stdin);print('history_after_create=',len(d),d[0]['status']['statusName'],d[0]['author']['login'])" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/tasks/$T/status" -H "Content-Type: application/json" -d "{\"newStatusId\":$S2}" -w "\npatch=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks/$T/history" | python3 -c "import sys,json;d=json.load(sys.stdin);print('history_after_patch=',len(d),[h['status']['statusName'] for h in d])" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks/$T" | python3 -c "import sys,json;d=json.load(sys.stdin);print('task_after_patch status=',d['status']['statusName'],'order=',d['order'])"
 ```
 
 Ожидаемо: `history_after_create= 1 To Do kbtest`; `patch=200` и в теле объект с `statusChangeId`, `author`; `history_after_patch= 2 ['In Progress', 'To Do']` (свежие сверху); `task_after_patch status= In Progress order= 0`.
@@ -1962,7 +1962,7 @@ pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltk
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Responses/StatusHistoryResponse.cs Services/TaskService.cs Controllers/TaskController.cs && git commit -m "Бек: история статусов задачи с автором и порядок при старой смене статуса"
+cd . && git add Models/Responses/StatusHistoryResponse.cs Services/TaskService.cs Controllers/TaskController.cs && git commit -m "Бек: история статусов задачи с автором и порядок при старой смене статуса"
 ```
 
 ---
@@ -1970,9 +1970,9 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Respon
 ## Task 15: CRUD колонок
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Requests/StatusRequest.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Services/StatusService.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Controllers/StatusController.cs`
+- Create: `./Models/Requests/StatusRequest.cs`
+- Modify: `./Services/StatusService.cs`
+- Modify: `./Controllers/StatusController.cs`
 
 - [ ] Создать `Models/Requests/StatusRequest.cs`:
 
@@ -2256,7 +2256,7 @@ namespace KanbanBoard.Controllers
 - [ ] Проверка: перезапустить приложение и прогнать создание, переименование, удаление непустой колонки (409), удаление пустой (204 + переиндексация), удаление от участника-не-владельца (404):
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies /tmp/kb2.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; curl -s -c /tmp/kb2.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest2","password":"secret123"}' -o /dev/null ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"CRUD колонок","description":"c"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/users" -H "Content-Type: application/json" -d '{"login":"kbtest2"}' -o /dev/null ; NEW=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/statuses" -H "Content-Type: application/json" -d '{"name":"Ревью"}' | python3 -c "import sys,json;d=json.load(sys.stdin);print(d['statusId'],'created order=',d['order'],file=sys.stderr);print(d['statusId'])") ; curl -s -b /tmp/kb.cookies -X PUT "http://localhost:5110/api/boards/$B/statuses/$NEW" -H "Content-Type: application/json" -d '{"name":"Код-ревью"}' -w "\nrename=%{http_code}\n" ; FIRST=$(curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses" | python3 -c "import sys,json;print(json.load(sys.stdin)[0]['statusId'])") ; curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d '{"taskName":"Занимает колонку","deadline":"2026-12-31T12:00:00Z","workerId":null}' -o /dev/null ; curl -s -b /tmp/kb.cookies -X DELETE "http://localhost:5110/api/boards/$B/statuses/$FIRST" -w "\ndelete_nonempty=%{http_code}\n" ; curl -s -b /tmp/kb2.cookies -X DELETE "http://localhost:5110/api/boards/$B/statuses/$NEW" -o /dev/null -w "delete_by_member=%{http_code}\n" ; curl -s -b /tmp/kb.cookies -X DELETE "http://localhost:5110/api/boards/$B/statuses/$NEW" -o /dev/null -w "delete_empty=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses" | python3 -c "import sys,json;print('orders=',[(s['statusName'],s['order']) for s in json.load(sys.stdin)])"
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies /tmp/kb2.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; curl -s -c /tmp/kb2.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest2","password":"secret123"}' -o /dev/null ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"CRUD колонок","description":"c"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/users" -H "Content-Type: application/json" -d '{"login":"kbtest2"}' -o /dev/null ; NEW=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/statuses" -H "Content-Type: application/json" -d '{"name":"Ревью"}' | python3 -c "import sys,json;d=json.load(sys.stdin);print(d['statusId'],'created order=',d['order'],file=sys.stderr);print(d['statusId'])") ; curl -s -b /tmp/kb.cookies -X PUT "http://localhost:5110/api/boards/$B/statuses/$NEW" -H "Content-Type: application/json" -d '{"name":"Код-ревью"}' -w "\nrename=%{http_code}\n" ; FIRST=$(curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses" | python3 -c "import sys,json;print(json.load(sys.stdin)[0]['statusId'])") ; curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d '{"taskName":"Занимает колонку","deadline":"2026-12-31T12:00:00Z","workerId":null}' -o /dev/null ; curl -s -b /tmp/kb.cookies -X DELETE "http://localhost:5110/api/boards/$B/statuses/$FIRST" -w "\ndelete_nonempty=%{http_code}\n" ; curl -s -b /tmp/kb2.cookies -X DELETE "http://localhost:5110/api/boards/$B/statuses/$NEW" -o /dev/null -w "delete_by_member=%{http_code}\n" ; curl -s -b /tmp/kb.cookies -X DELETE "http://localhost:5110/api/boards/$B/statuses/$NEW" -o /dev/null -w "delete_empty=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses" | python3 -c "import sys,json;print('orders=',[(s['statusName'],s['order']) for s in json.load(sys.stdin)])"
 ```
 
 Ожидаемо: во второй строке (stderr) `created order= 3`; `rename=200` и в теле `"statusName":"Код-ревью"`; `delete_nonempty=409` с телом `В колонке есть задачи`; `delete_by_member=404`; `delete_empty=204`; `orders= [('To Do', 0), ('In Progress', 1), ('Done', 2)]`.
@@ -2272,7 +2272,7 @@ B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Cont
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Requests/StatusRequest.cs Services/StatusService.cs Controllers/StatusController.cs && git commit -m "Бек: CRUD колонок доски с 409 на непустую и последнюю колонку"
+cd . && git add Models/Requests/StatusRequest.cs Services/StatusService.cs Controllers/StatusController.cs && git commit -m "Бек: CRUD колонок доски с 409 на непустую и последнюю колонку"
 ```
 
 ---
@@ -2280,10 +2280,10 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Reques
 ## Task 16: `PATCH /api/boards/{boardId}/statuses/{statusId}/position`
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Requests/StatusPositionRequest.cs`
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Responses/StatusPositionResponse.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Services/StatusService.cs` (новый метод `MoveStatusAsync`)
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Controllers/StatusController.cs` (новый экшен)
+- Create: `./Models/Requests/StatusPositionRequest.cs`
+- Create: `./Models/Responses/StatusPositionResponse.cs`
+- Modify: `./Services/StatusService.cs` (новый метод `MoveStatusAsync`)
+- Modify: `./Controllers/StatusController.cs` (новый экшен)
 
 - [ ] Создать `Models/Requests/StatusPositionRequest.cs`:
 
@@ -2405,7 +2405,7 @@ namespace KanbanBoard.Models.Responses
 - [ ] Проверка: перезапустить приложение, перетащить последнюю колонку в начало, затем задать позицию за пределами диапазона (кламп):
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Перестановка колонок","description":"p"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; DONE=$(curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses" | python3 -c "import sys,json;print(json.load(sys.stdin)[2]['statusId'])") ; echo "board=$B done=$DONE" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/statuses/$DONE/position" -H "Content-Type: application/json" -d '{"position":0}' -w "\nmove=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses" | python3 -c "import sys,json;print('after_move=',[(s['statusName'],s['order']) for s in json.load(sys.stdin)])" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/statuses/$DONE/position" -H "Content-Type: application/json" -d '{"position":99}' -o /dev/null -w "clamp_high=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses" | python3 -c "import sys,json;print('after_clamp_high=',[(s['statusName'],s['order']) for s in json.load(sys.stdin)])" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/statuses/$DONE/position" -H "Content-Type: application/json" -d '{"position":-5}' -o /dev/null -w "clamp_low=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses" | python3 -c "import sys,json;print('after_clamp_low=',[(s['statusName'],s['order']) for s in json.load(sys.stdin)])" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/statuses/99999999/position" -H "Content-Type: application/json" -d '{"position":0}' -o /dev/null -w "missing=%{http_code}\n"
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Перестановка колонок","description":"p"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; DONE=$(curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses" | python3 -c "import sys,json;print(json.load(sys.stdin)[2]['statusId'])") ; echo "board=$B done=$DONE" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/statuses/$DONE/position" -H "Content-Type: application/json" -d '{"position":0}' -w "\nmove=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses" | python3 -c "import sys,json;print('after_move=',[(s['statusName'],s['order']) for s in json.load(sys.stdin)])" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/statuses/$DONE/position" -H "Content-Type: application/json" -d '{"position":99}' -o /dev/null -w "clamp_high=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses" | python3 -c "import sys,json;print('after_clamp_high=',[(s['statusName'],s['order']) for s in json.load(sys.stdin)])" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/statuses/$DONE/position" -H "Content-Type: application/json" -d '{"position":-5}' -o /dev/null -w "clamp_low=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses" | python3 -c "import sys,json;print('after_clamp_low=',[(s['statusName'],s['order']) for s in json.load(sys.stdin)])" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/statuses/99999999/position" -H "Content-Type: application/json" -d '{"position":0}' -o /dev/null -w "missing=%{http_code}\n"
 ```
 
 Ожидаемо: `move=200` и в теле массив из трёх объектов `{"id":…,"order":…}`; `after_move= [('Done', 0), ('To Do', 1), ('In Progress', 2)]`; `clamp_high=200` и `after_clamp_high= [('To Do', 0), ('In Progress', 1), ('Done', 2)]`; `clamp_low=200` и `after_clamp_low= [('Done', 0), ('To Do', 1), ('In Progress', 2)]`; `missing=404`.
@@ -2413,7 +2413,7 @@ pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltk
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Requests/StatusPositionRequest.cs Models/Responses/StatusPositionResponse.cs Services/StatusService.cs Controllers/StatusController.cs && git commit -m "Бек: перестановка колонок доски с клампом позиции и переиндексацией"
+cd . && git add Models/Requests/StatusPositionRequest.cs Models/Responses/StatusPositionResponse.cs Services/StatusService.cs Controllers/StatusController.cs && git commit -m "Бек: перестановка колонок доски с клампом позиции и переиндексацией"
 ```
 
 ---
@@ -2421,10 +2421,10 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Reques
 ## Task 17: `PATCH /api/boards/{boardId}/tasks/{taskId}/position`
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Requests/TaskPositionRequest.cs`
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Responses/TaskPositionResponse.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Services/TaskService.cs` (новый метод `MoveTaskAsync`)
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Controllers/TaskController.cs` (новый экшен)
+- Create: `./Models/Requests/TaskPositionRequest.cs`
+- Create: `./Models/Responses/TaskPositionResponse.cs`
+- Modify: `./Services/TaskService.cs` (новый метод `MoveTaskAsync`)
+- Modify: `./Controllers/TaskController.cs` (новый экшен)
 
 - [ ] Создать `Models/Requests/TaskPositionRequest.cs`:
 
@@ -2587,7 +2587,7 @@ namespace KanbanBoard.Models.Responses
 - [ ] Проверка: перезапустить приложение и прогнать сценарий из §9 спеки — перестановка внутри колонки, перенос между колонками, кламп, чужая доска:
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"DnD","description":"d"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; S=$(curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses" | python3 -c "import sys,json;d=json.load(sys.stdin);print(d[0]['statusId'],d[1]['statusId'])") ; set -- $S ; S1=$1 ; S2=$2 ; for n in A B C; do curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d "{\"taskName\":\"$n\",\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":null}" -o /dev/null ; done ; TASKS=$(curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks" | python3 -c "import sys,json;print(' '.join(str(t['taskId']) for t in json.load(sys.stdin)))") ; set -- $TASKS ; TA=$1 ; TB=$2 ; TC=$3 ; echo "board=$B s1=$S1 s2=$S2 A=$TA B=$TB C=$TC" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/tasks/$TC/position" -H "Content-Type: application/json" -d "{\"statusId\":$S1,\"position\":0}" -w "\nreorder=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks" | python3 -c "import sys,json;print('after_reorder=',[(t['taskName'],t['order']) for t in json.load(sys.stdin)])" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/tasks/$TC/position" -H "Content-Type: application/json" -d "{\"statusId\":$S2,\"position\":0}" -w "\nmove_between=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks" | python3 -c "import sys,json;print('after_move=',[(t['taskName'],t['status']['statusName'],t['order']) for t in json.load(sys.stdin)])" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/tasks/$TA/position" -H "Content-Type: application/json" -d "{\"statusId\":$S1,\"position\":99}" -o /dev/null -w "clamp=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks" | python3 -c "import sys,json;print('after_clamp=',[(t['taskName'],t['status']['statusName'],t['order']) for t in json.load(sys.stdin)])" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks/$TC/history" | python3 -c "import sys,json;print('history=',[h['status']['statusName'] for h in json.load(sys.stdin)])" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/tasks/$TC/position" -H "Content-Type: application/json" -d '{"statusId":99999999,"position":0}' -o /dev/null -w "alien_status=%{http_code}\n"
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"DnD","description":"d"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; S=$(curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/statuses" | python3 -c "import sys,json;d=json.load(sys.stdin);print(d[0]['statusId'],d[1]['statusId'])") ; set -- $S ; S1=$1 ; S2=$2 ; for n in A B C; do curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d "{\"taskName\":\"$n\",\"deadline\":\"2026-12-31T12:00:00Z\",\"workerId\":null}" -o /dev/null ; done ; TASKS=$(curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks" | python3 -c "import sys,json;print(' '.join(str(t['taskId']) for t in json.load(sys.stdin)))") ; set -- $TASKS ; TA=$1 ; TB=$2 ; TC=$3 ; echo "board=$B s1=$S1 s2=$S2 A=$TA B=$TB C=$TC" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/tasks/$TC/position" -H "Content-Type: application/json" -d "{\"statusId\":$S1,\"position\":0}" -w "\nreorder=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks" | python3 -c "import sys,json;print('after_reorder=',[(t['taskName'],t['order']) for t in json.load(sys.stdin)])" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/tasks/$TC/position" -H "Content-Type: application/json" -d "{\"statusId\":$S2,\"position\":0}" -w "\nmove_between=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks" | python3 -c "import sys,json;print('after_move=',[(t['taskName'],t['status']['statusName'],t['order']) for t in json.load(sys.stdin)])" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/tasks/$TA/position" -H "Content-Type: application/json" -d "{\"statusId\":$S1,\"position\":99}" -o /dev/null -w "clamp=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks" | python3 -c "import sys,json;print('after_clamp=',[(t['taskName'],t['status']['statusName'],t['order']) for t in json.load(sys.stdin)])" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks/$TC/history" | python3 -c "import sys,json;print('history=',[h['status']['statusName'] for h in json.load(sys.stdin)])" ; curl -s -b /tmp/kb.cookies -X PATCH "http://localhost:5110/api/boards/$B/tasks/$TC/position" -H "Content-Type: application/json" -d '{"statusId":99999999,"position":0}' -o /dev/null -w "alien_status=%{http_code}\n"
 ```
 
 Ожидаемо:
@@ -2600,7 +2600,7 @@ pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltk
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Requests/TaskPositionRequest.cs Models/Responses/TaskPositionResponse.cs Services/TaskService.cs Controllers/TaskController.cs && git commit -m "Бек: перенос задачи между колонками и внутри колонки с переиндексацией и историей"
+cd . && git add Models/Requests/TaskPositionRequest.cs Models/Responses/TaskPositionResponse.cs Services/TaskService.cs Controllers/TaskController.cs && git commit -m "Бек: перенос задачи между колонками и внутри колонки с переиндексацией и историей"
 ```
 
 ---
@@ -2608,8 +2608,8 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Reques
 ## Task 18: `CommentResponse` — `TaskId` и вложения
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Models/Responses/CommentResponse.cs`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Services/CommentService.cs`
+- Modify: `./Models/Responses/CommentResponse.cs`
+- Modify: `./Services/CommentService.cs`
 
 - [ ] Перезаписать `Models/Responses/CommentResponse.cs`:
 
@@ -2820,7 +2820,7 @@ namespace KanbanBoard.Services
 - [ ] Проверка: перезапустить приложение, создать комментарий, приложить к нему файл и прочитать список комментариев:
 
 ```bash
-pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && echo "вложение" > /tmp/kb-file.txt && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Комментарии","description":"c"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; T=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d '{"taskName":"С комментами","deadline":"2026-12-31T12:00:00Z","workerId":null}' | python3 -c "import sys,json;print(json.load(sys.stdin)['taskId'])") ; C=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks/$T/comments" -H "Content-Type: application/json" -d '{"text":"Первый коммент"}' | python3 -c "import sys,json;d=json.load(sys.stdin);print(d['commentId'],'created taskId=',d['taskId'],'attachments=',d['attachments'],file=sys.stderr);print(d['commentId'])") ; curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/comments/$C/attachments" -F "file=@/tmp/kb-file.txt" -o /dev/null -w "upload=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks/$T/comments" ; echo ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks/$T" | python3 -c "import sys,json;d=json.load(sys.stdin);print('task counts: comments=',d['commentsCount'],'attachments=',d['attachmentsCount'])"
+pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd . && dotnet build 2>&1 | tail -3 && (nohup dotnet run --no-build --launch-profile http > /tmp/kb-run.log 2>&1 &) && sleep 12 && rm -f /tmp/kb.cookies && echo "вложение" > /tmp/kb-file.txt && curl -s -c /tmp/kb.cookies -X POST http://localhost:5110/api/auth/login -H "Content-Type: application/json" -d '{"login":"kbtest","password":"secret123"}' -o /dev/null -w "login=%{http_code}\n" ; B=$(curl -s -b /tmp/kb.cookies -X POST http://localhost:5110/api/boards -H "Content-Type: application/json" -d '{"name":"Комментарии","description":"c"}' | python3 -c "import sys,json;print(json.load(sys.stdin)['boardId'])") ; T=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks" -H "Content-Type: application/json" -d '{"taskName":"С комментами","deadline":"2026-12-31T12:00:00Z","workerId":null}' | python3 -c "import sys,json;print(json.load(sys.stdin)['taskId'])") ; C=$(curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/tasks/$T/comments" -H "Content-Type: application/json" -d '{"text":"Первый коммент"}' | python3 -c "import sys,json;d=json.load(sys.stdin);print(d['commentId'],'created taskId=',d['taskId'],'attachments=',d['attachments'],file=sys.stderr);print(d['commentId'])") ; curl -s -b /tmp/kb.cookies -X POST "http://localhost:5110/api/boards/$B/comments/$C/attachments" -F "file=@/tmp/kb-file.txt" -o /dev/null -w "upload=%{http_code}\n" ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks/$T/comments" ; echo ; curl -s -b /tmp/kb.cookies "http://localhost:5110/api/boards/$B/tasks/$T" | python3 -c "import sys,json;d=json.load(sys.stdin);print('task counts: comments=',d['commentsCount'],'attachments=',d['attachmentsCount'])"
 ```
 
 Ожидаемо: в stderr `created taskId= <T> attachments= []`; `upload=200`; список комментариев — один объект с `commentId`, `taskId`, `text`, `madeDate`, `isEdited`, `author`, и `attachments` из одного элемента (`fileName` = `kb-file.txt`, без `filePath`); `task counts: comments= 1 attachments= 0` (вложение висит на комментарии, а не на задаче — как требует §6.4).
@@ -2828,7 +2828,7 @@ pkill -f "KanbanBoard.dll" ; pkill -f "dotnet run" ; sleep 2 ; cd /Users/paveltk
 - [ ] Коммит:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Responses/CommentResponse.cs Services/CommentService.cs && git commit -m "Бек: CommentResponse отдаёт задачу и вложения комментария"
+cd . && git add Models/Responses/CommentResponse.cs Services/CommentService.cs && git commit -m "Бек: CommentResponse отдаёт задачу и вложения комментария"
 ```
 
 ---
@@ -2838,7 +2838,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Models/Respon
 - [ ] Финальная сборка без ошибок:
 
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build 2>&1 | tail -5
+cd . && dotnet build 2>&1 | tail -5
 ```
 
 Ожидаемо: `Build succeeded.`, `0 Error(s)`.
