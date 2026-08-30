@@ -5,15 +5,17 @@ import { store, route, loadBoard, moveTask, applyTaskUpdate, pushToast, openTask
 import { initials, avatarStyle } from '/js/ui.js';
 import TaskColumn from '/js/components/TaskColumn.js';
 import TaskPanel from '/js/components/TaskPanel.js';
+import BoardSettingsModal from '/js/components/BoardSettingsModal.js';
 
 export default {
     name: 'BoardView',
-    components: { TaskColumn, TaskPanel },
+    components: { TaskColumn, TaskPanel, BoardSettingsModal },
     props: {
         boardId: { type: Number, required: true }
     },
     setup(props) {
         const creating = ref(false);
+        const settingsOpen = ref(false);
         const form = ref({ taskName: '', taskDescription: '', deadlineLocal: '', workerId: '', statusId: null });
         const busy = ref(false);
         const formError = ref('');
@@ -86,7 +88,7 @@ export default {
 
         return {
             S, LIMITS, store, route, initials, avatarStyle,
-            creating, form, busy, formError, fieldErrors, openCreate, createTask, onMove, pushToast
+            creating, settingsOpen, form, busy, formError, fieldErrors, openCreate, createTask, onMove, pushToast
         };
     },
     template: `
@@ -106,7 +108,7 @@ export default {
                 <div class="kb-board__members" :title="S.board.members">
                     <span v-for="m in store.members" :key="m.userId" class="kb-avatar" :style="avatarStyle(m.login)" :title="m.login">{{ initials(m.login) }}</span>
                 </div>
-                <button type="button" class="kb-btn kb-btn--sm" @click="pushToast(S.settings.title)">{{ S.board.settings }}</button>
+                <button type="button" class="kb-btn kb-btn--sm" @click="settingsOpen = true">{{ S.board.settings }}</button>
             </header>
 
             <div class="kb-columns">
@@ -119,6 +121,8 @@ export default {
             </div>
 
             <TaskPanel v-if="store.task" :key="store.task.taskId" :board-id="boardId" :task="store.task" />
+
+            <BoardSettingsModal v-if="settingsOpen" @close="settingsOpen = false" />
 
             <div v-if="creating" class="kb-modal-overlay" @click.self="creating = false">
                 <div class="kb-modal">
