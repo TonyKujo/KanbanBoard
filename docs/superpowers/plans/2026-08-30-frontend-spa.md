@@ -53,41 +53,41 @@
 ### Task 1: Вендоринг Vue 3.5.13 и отдача статики
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/lib/vue.esm-browser.prod.js` (скачивается)
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Program.cs` (строка 53, перед `app.UseRouting();`)
+- Create: `./wwwroot/lib/vue.esm-browser.prod.js` (скачивается)
+- Modify: `./Program.cs` (строка 53, перед `app.UseRouting();`)
 
 - [ ] Создать каталог для вендоренной библиотеки:
 ```bash
-mkdir -p /Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/lib
+mkdir -p ./wwwroot/lib
 ```
 
 - [ ] Скачать Vue 3.5.13 (версия пиним точно, §3 спеки):
 ```bash
 curl -fsSL https://unpkg.com/vue@3.5.13/dist/vue.esm-browser.prod.js \
-  -o /Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/lib/vue.esm-browser.prod.js
+  -o ./wwwroot/lib/vue.esm-browser.prod.js
 ```
 
 - [ ] Проверить, что скачался именно нужный файл и именно нужной версии:
 ```bash
-grep -c "vue v3.5.13" /Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/lib/vue.esm-browser.prod.js
+grep -c "vue v3.5.13" ./wwwroot/lib/vue.esm-browser.prod.js
 ```
 Ожидаемый вывод: `1`
 
 - [ ] Проверить, что файл целый (не HTML-заглушка и не обрезан):
 ```bash
-wc -c < /Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/lib/vue.esm-browser.prod.js
+wc -c < ./wwwroot/lib/vue.esm-browser.prod.js
 ```
 Ожидаемый вывод: число больше `100000` (реально ~157000 байт).
 
 - [ ] Проверить, что модуль экспортирует нужное:
 ```bash
-grep -c "export{" /Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/lib/vue.esm-browser.prod.js
+grep -c "export{" ./wwwroot/lib/vue.esm-browser.prod.js
 ```
 Ожидаемый вывод: `1`
 
 - [ ] Открыть `Program.cs` и проверить, есть ли уже `app.UseStaticFiles();`:
 ```bash
-grep -n "UseStaticFiles" /Users/paveltkacenko/projects/myprojects/KanbanBoard/Program.cs
+grep -n "UseStaticFiles" ./Program.cs
 ```
 Если строка найдена (фаза 1 бека уже отработала) — следующий шаг пропустить.
 
@@ -108,13 +108,13 @@ app.UseAuthentication();
 
 - [ ] Собрать проект:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build
+cd . && dotnet build
 ```
 Ожидаемый вывод: `Build succeeded.` и `0 Error(s)`.
 
 - [ ] Запустить приложение и проверить, что Vue отдаётся статикой:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet run
+cd . && dotnet run
 ```
 В другом терминале:
 ```bash
@@ -124,7 +124,7 @@ curl -s -o /dev/null -w "%{http_code} %{content_type} %{size_download}\n" http:/
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/lib/vue.esm-browser.prod.js Program.cs && git commit -m "Вендоринг Vue 3.5.13 и включение отдачи статики"
+cd . && git add wwwroot/lib/vue.esm-browser.prod.js Program.cs && git commit -m "Вендоринг Vue 3.5.13 и включение отдачи статики"
 ```
 
 ---
@@ -132,11 +132,11 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/lib/v
 ### Task 2: Дизайн-токены обеих тем
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/css/tokens.css`
+- Create: `./wwwroot/css/tokens.css`
 
 - [ ] Создать каталог стилей:
 ```bash
-mkdir -p /Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/css
+mkdir -p ./wwwroot/css
 ```
 
 - [ ] Создать `wwwroot/css/tokens.css` со следующим содержимым (светлая тема — на `:root`; тёмная — дважды: явным атрибутом и через `prefers-color-scheme` для system-режима, когда атрибут не выставлен):
@@ -239,13 +239,13 @@ mkdir -p /Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/css
 
 - [ ] Проверить, что оба тёмных блока определяют одинаковый набор токенов (защита от расхождения при правках):
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && grep -c -- "--kb-bg: #16181d" wwwroot/css/tokens.css
+cd . && grep -c -- "--kb-bg: #16181d" wwwroot/css/tokens.css
 ```
 Ожидаемый вывод: `2`
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/css/tokens.css && git commit -m "Дизайн-токены светлой и тёмной темы"
+cd . && git add wwwroot/css/tokens.css && git commit -m "Дизайн-токены светлой и тёмной темы"
 ```
 
 ---
@@ -253,7 +253,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/css/t
 ### Task 3: Общие стили приложения
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/css/app.css`
+- Create: `./wwwroot/css/app.css`
 
 Стили пишутся сразу на все три фазы одним файлом — чтобы не редактировать CSS в каждой последующей задаче.
 
@@ -708,13 +708,13 @@ button, input, textarea, select { font: inherit; color: inherit; }
 
 - [ ] Проверить, что в стилях нет захардкоженных цветов мимо токенов (допустимы только `#fff`/`#ffffff` на акцентных кнопках и аватарах):
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && grep -nE "#[0-9a-fA-F]{3,6}" wwwroot/css/app.css | grep -v "#fff"
+cd . && grep -nE "#[0-9a-fA-F]{3,6}" wwwroot/css/app.css | grep -v "#fff"
 ```
 Ожидаемый вывод: пусто.
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/css/app.css && git commit -m "Общие стили приложения"
+cd . && git add wwwroot/css/app.css && git commit -m "Общие стили приложения"
 ```
 
 ---
@@ -722,9 +722,9 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/css/a
 ### Task 4: Razor-оболочка SPA
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Views/Shared/_Layout.cshtml` (весь файл, 14 строк)
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/Views/Home/Index.cshtml` (весь файл, 5 строк)
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/app.js` (смоук-версия, будет полностью заменена в Task 12)
+- Modify: `./Views/Shared/_Layout.cshtml` (весь файл, 14 строк)
+- Modify: `./Views/Home/Index.cshtml` (весь файл, 5 строк)
+- Create: `./wwwroot/js/app.js` (смоук-версия, будет полностью заменена в Task 12)
 
 - [ ] Полностью заменить содержимое `Views/Shared/_Layout.cshtml` на:
 ```html
@@ -771,7 +771,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/css/a
 
 - [ ] Создать каталоги для скриптов:
 ```bash
-mkdir -p /Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/components
+mkdir -p ./wwwroot/js/components
 ```
 
 - [ ] Создать `wwwroot/js/app.js` со смоук-версией (в Task 12 файл будет заменён целиком):
@@ -787,7 +787,7 @@ createApp({
 
 - [ ] Собрать и запустить приложение:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build && dotnet run
+cd . && dotnet build && dotnet run
 ```
 Ожидаемый вывод сборки: `Build succeeded.`, `0 Error(s)`.
 
@@ -797,7 +797,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet build && dotne
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Views/Shared/_Layout.cshtml Views/Home/Index.cshtml wwwroot/js/app.js && git commit -m "Razor-оболочка SPA с подключением css и модуля точки входа"
+cd . && git add Views/Shared/_Layout.cshtml Views/Home/Index.cshtml wwwroot/js/app.js && git commit -m "Razor-оболочка SPA с подключением css и модуля точки входа"
 ```
 
 ---
@@ -805,7 +805,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add Views/Shared/
 ### Task 5: Строки интерфейса
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/strings.js`
+- Create: `./wwwroot/js/strings.js`
 
 - [ ] Создать `wwwroot/js/strings.js` со следующим содержимым:
 ```js
@@ -952,7 +952,7 @@ const m = await import('/js/strings.js'); m.S.errors.tooLong(50)
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/strings.js && git commit -m "Строки интерфейса на русском"
+cd . && git add wwwroot/js/strings.js && git commit -m "Строки интерфейса на русском"
 ```
 
 ---
@@ -960,7 +960,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/st
 ### Task 6: Хелперы отображения
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/ui.js`
+- Create: `./wwwroot/js/ui.js`
 
 - [ ] Создать `wwwroot/js/ui.js` со следующим содержимым:
 ```js
@@ -1046,7 +1046,7 @@ const u = await import('/js/ui.js'); [u.formatDate('2026-09-05T12:00:00'), u.ini
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/ui.js && git commit -m "Хелперы отображения дат, дедлайнов и аватаров"
+cd . && git add wwwroot/js/ui.js && git commit -m "Хелперы отображения дат, дедлайнов и аватаров"
 ```
 
 ---
@@ -1054,7 +1054,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/ui
 ### Task 7: Клиент API
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/api.js`
+- Create: `./wwwroot/js/api.js`
 
 - [ ] Создать `wwwroot/js/api.js` со следующим содержимым:
 ```js
@@ -1382,7 +1382,7 @@ try { await a.api.boards(); } catch (e) { console.log(e.status, e.message); }
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/api.js && git commit -m "Клиент API с нормализацией ошибок и клиентской валидацией"
+cd . && git add wwwroot/js/api.js && git commit -m "Клиент API с нормализацией ошибок и клиентской валидацией"
 ```
 
 ---
@@ -1390,7 +1390,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/ap
 ### Task 8: Общее состояние
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/store.js`
+- Create: `./wwwroot/js/store.js`
 
 `route` и `navigate` живут здесь, а не в `app.js`: их читают компоненты, и если бы они экспортировались из `app.js`, получился бы цикл импортов (app.js → компоненты → app.js). Разбор хеша (`parseHash`) остаётся в `app.js`.
 
@@ -1587,7 +1587,7 @@ const s = await import('/js/store.js'); s.pushToast('проверка'); s.store
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/store.js && git commit -m "Общее реактивное состояние приложения"
+cd . && git add wwwroot/js/store.js && git commit -m "Общее реактивное состояние приложения"
 ```
 
 ---
@@ -1595,8 +1595,8 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/st
 ### Task 9: Тосты и переключатель темы
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/components/Toast.js`
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/components/ThemeToggle.js`
+- Create: `./wwwroot/js/components/Toast.js`
+- Create: `./wwwroot/js/components/ThemeToggle.js`
 
 - [ ] Создать `wwwroot/js/components/Toast.js`:
 ```js
@@ -1675,7 +1675,7 @@ const [t, th] = await Promise.all([import('/js/components/Toast.js'), import('/j
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/components/Toast.js wwwroot/js/components/ThemeToggle.js && git commit -m "Компоненты тостов и переключателя темы"
+cd . && git add wwwroot/js/components/Toast.js wwwroot/js/components/ThemeToggle.js && git commit -m "Компоненты тостов и переключателя темы"
 ```
 
 ---
@@ -1683,7 +1683,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/co
 ### Task 10: Экран входа и регистрации
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/components/LoginPage.js`
+- Create: `./wwwroot/js/components/LoginPage.js`
 
 - [ ] Создать `wwwroot/js/components/LoginPage.js`:
 ```js
@@ -1775,7 +1775,7 @@ export default {
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/components/LoginPage.js && git commit -m "Экран входа и регистрации"
+cd . && git add wwwroot/js/components/LoginPage.js && git commit -m "Экран входа и регистрации"
 ```
 
 ---
@@ -1783,8 +1783,8 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/co
 ### Task 11: Сайдбар и сетка досок
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/components/Sidebar.js`
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/components/BoardsGrid.js`
+- Create: `./wwwroot/js/components/Sidebar.js`
+- Create: `./wwwroot/js/components/BoardsGrid.js`
 
 - [ ] Создать `wwwroot/js/components/Sidebar.js`:
 ```js
@@ -1955,7 +1955,7 @@ const [s, g] = await Promise.all([import('/js/components/Sidebar.js'), import('/
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/components/Sidebar.js wwwroot/js/components/BoardsGrid.js && git commit -m "Сайдбар со списком досок и сетка досок"
+cd . && git add wwwroot/js/components/Sidebar.js wwwroot/js/components/BoardsGrid.js && git commit -m "Сайдбар со списком досок и сетка досок"
 ```
 
 ---
@@ -1963,7 +1963,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/co
 ### Task 12: Роутер и сборка каркаса
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/app.js` (полная замена смоук-версии из Task 4)
+- Modify: `./wwwroot/js/app.js` (полная замена смоук-версии из Task 4)
 
 - [ ] Полностью заменить содержимое `wwwroot/js/app.js` на:
 ```js
@@ -2066,7 +2066,7 @@ createApp(App).mount('#app');
 
 - [ ] Запустить приложение:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet run
+cd . && dotnet run
 ```
 
 - [ ] Проверить регистрацию: открыть `http://localhost:5110` в приватном окне браузера. Ожидается: центрированная карточка «KanbanBoard / Вход в рабочее пространство» с вкладками «Вход»/«Регистрация», адрес меняется на `http://localhost:5110/#/login`. Переключиться на «Регистрация», ввести логин `pavel-front` и пароль `123456`, нажать «Зарегистрироваться». Ожидается: экран сменился на каркас — слева сайдбар «KanbanBoard / МОИ ДОСКИ / Нет досок», внизу переключатель темы и логин с кнопкой «Выход»; справа заголовок «Доски», кнопка «+ Новая доска» и текст «Досок пока нет — создайте первую доску»; адрес `#/`.
@@ -2087,7 +2087,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet run
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/app.js && git commit -m "Hash-роутер и сборка каркаса SPA"
+cd . && git add wwwroot/js/app.js && git commit -m "Hash-роутер и сборка каркаса SPA"
 ```
 
 ---
@@ -2095,7 +2095,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/ap
 ### Task 13: Перемещение задач в сторе
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/store.js` (добавление в конец файла)
+- Modify: `./wwwroot/js/store.js` (добавление в конец файла)
 
 - [ ] В конец `wwwroot/js/store.js` дописать блок оптимистичного перемещения задач:
 ```js
@@ -2180,7 +2180,7 @@ const s = await import('/js/store.js'); [typeof s.moveTask, typeof s.applyTaskPo
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/store.js && git commit -m "Оптимистичное перемещение задач с откатом при ошибке"
+cd . && git add wwwroot/js/store.js && git commit -m "Оптимистичное перемещение задач с откатом при ошибке"
 ```
 
 ---
@@ -2188,7 +2188,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/st
 ### Task 14: Карточка задачи
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/components/TaskCard.js`
+- Create: `./wwwroot/js/components/TaskCard.js`
 
 - [ ] Создать `wwwroot/js/components/TaskCard.js`:
 ```js
@@ -2259,7 +2259,7 @@ export default {
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/components/TaskCard.js && git commit -m "Карточка задачи с бейджем дедлайна, аватаром и счётчиками"
+cd . && git add wwwroot/js/components/TaskCard.js && git commit -m "Карточка задачи с бейджем дедлайна, аватаром и счётчиками"
 ```
 
 ---
@@ -2267,7 +2267,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/co
 ### Task 15: Колонка доски с drop-зоной
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/components/TaskColumn.js`
+- Create: `./wwwroot/js/components/TaskColumn.js`
 
 - [ ] Создать `wwwroot/js/components/TaskColumn.js`:
 ```js
@@ -2355,7 +2355,7 @@ export default {
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/components/TaskColumn.js && git commit -m "Колонка доски со списком задач и drop-зоной"
+cd . && git add wwwroot/js/components/TaskColumn.js && git commit -m "Колонка доски со списком задач и drop-зоной"
 ```
 
 ---
@@ -2363,8 +2363,8 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/co
 ### Task 16: Экран доски
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/components/BoardView.js`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/app.js` (импорт и шаблон корневого компонента)
+- Create: `./wwwroot/js/components/BoardView.js`
+- Modify: `./wwwroot/js/app.js` (импорт и шаблон корневого компонента)
 
 - [ ] Создать `wwwroot/js/components/BoardView.js`:
 ```js
@@ -2553,7 +2553,7 @@ import BoardView from '/js/components/BoardView.js';
 
 - [ ] Запустить приложение:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet run
+cd . && dotnet run
 ```
 
 - [ ] Проверить экран доски: открыть `http://localhost:5110`, войти как `pavel-front`/`123456`, открыть доску «Фронт». Ожидается: шапка с названием доски, полем «Поиск по карточкам», аватаром участника справа и кнопкой «Настройки»; ниже — колонки доски (созданные беком по умолчанию), каждая с заголовком, счётчиком `0` и кнопкой «+ Задача»; в пустых колонках текст «В колонке нет задач».
@@ -2574,7 +2574,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet run
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/components/BoardView.js wwwroot/js/app.js && git commit -m "Экран доски: шапка, поиск, колонки, создание задач и drag&drop"
+cd . && git add wwwroot/js/components/BoardView.js wwwroot/js/app.js && git commit -m "Экран доски: шапка, поиск, колонки, создание задач и drag&drop"
 ```
 
 ---
@@ -2582,7 +2582,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/co
 ### Task 17: Комментарии задачи
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/components/CommentList.js`
+- Create: `./wwwroot/js/components/CommentList.js`
 
 - [ ] Создать `wwwroot/js/components/CommentList.js`:
 ```js
@@ -2786,7 +2786,7 @@ export default {
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/components/CommentList.js && git commit -m "Комментарии задачи с оптимистичной отправкой и вложениями"
+cd . && git add wwwroot/js/components/CommentList.js && git commit -m "Комментарии задачи с оптимистичной отправкой и вложениями"
 ```
 
 ---
@@ -2794,7 +2794,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/co
 ### Task 18: Панель задачи
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/components/TaskPanel.js`
+- Create: `./wwwroot/js/components/TaskPanel.js`
 
 - [ ] Создать `wwwroot/js/components/TaskPanel.js`:
 ```js
@@ -3042,7 +3042,7 @@ export default {
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/components/TaskPanel.js && git commit -m "Панель задачи в две колонки: поля, статус, вложения, история"
+cd . && git add wwwroot/js/components/TaskPanel.js && git commit -m "Панель задачи в две колонки: поля, статус, вложения, история"
 ```
 
 ---
@@ -3050,8 +3050,8 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/co
 ### Task 19: Подключение панели и deep-link на задачу
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/store.js` (добавление в конец файла)
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/components/BoardView.js` (импорты, setup, шаблон)
+- Modify: `./wwwroot/js/store.js` (добавление в конец файла)
+- Modify: `./wwwroot/js/components/BoardView.js` (импорты, setup, шаблон)
 
 - [ ] В конец `wwwroot/js/store.js` дописать открытие задачи по deep-link:
 ```js
@@ -3148,7 +3148,7 @@ import TaskPanel from '/js/components/TaskPanel.js';
 
 - [ ] Запустить приложение:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet run
+cd . && dotnet run
 ```
 
 - [ ] Проверить открытие панели: открыть `http://localhost:5110`, войти, открыть доску «Фронт», кликнуть карточку «Вторая». Ожидается: адрес стал `#/boards/{id}/tasks/{taskId}`; поверх доски справа — широкая панель (примерно 58% ширины экрана) в две колонки: слева `#id`, название в виде редактируемого поля, описание и блок «КОММЕНТАРИИ» с текстом «Комментариев пока нет»; справа — «СТАТУС» (select), «ИСПОЛНИТЕЛЬ», «ДЕДЛАЙН», «АВТОР», «СОЗДАНА», «ВЛОЖЕНИЯ ЗАДАЧИ» («Вложений нет») и «ИСТОРИЯ СТАТУСОВ» с одной записью — созданием задачи.
@@ -3171,7 +3171,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet run
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/store.js wwwroot/js/components/BoardView.js && git commit -m "Подключение панели задачи и обработка deep-link"
+cd . && git add wwwroot/js/store.js wwwroot/js/components/BoardView.js && git commit -m "Подключение панели задачи и обработка deep-link"
 ```
 
 ---
@@ -3179,8 +3179,8 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/st
 ### Task 20: Настройки доски — участники и «О доске»
 
 **Files:**
-- Create: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/components/BoardSettingsModal.js`
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/components/BoardView.js` (импорты, setup, шаблон, кнопка «Настройки»)
+- Create: `./wwwroot/js/components/BoardSettingsModal.js`
+- Modify: `./wwwroot/js/components/BoardView.js` (импорты, setup, шаблон, кнопка «Настройки»)
 
 - [ ] Создать `wwwroot/js/components/BoardSettingsModal.js` (вкладка «Колонки» добавляется в Task 21):
 ```js
@@ -3432,7 +3432,7 @@ import BoardSettingsModal from '/js/components/BoardSettingsModal.js';
 
 - [ ] Запустить приложение:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet run
+cd . && dotnet run
 ```
 
 - [ ] Проверить вкладку «Участники» у владельца: открыть доску «Фронт», нажать «Настройки». Ожидается: модалка «Настройки доски» с вкладками «Участники» и «О доске»; в списке — `pavel-front` с бейджем «владелец» и без кнопки «Удалить»; ниже поле «Добавить участника».
@@ -3449,7 +3449,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet run
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/components/BoardSettingsModal.js wwwroot/js/components/BoardView.js && git commit -m "Настройки доски: вкладки участников и «О доске»"
+cd . && git add wwwroot/js/components/BoardSettingsModal.js wwwroot/js/components/BoardView.js && git commit -m "Настройки доски: вкладки участников и «О доске»"
 ```
 
 ---
@@ -3457,7 +3457,7 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/co
 ### Task 21: Настройки доски — вкладка «Колонки» и финальная приёмка
 
 **Files:**
-- Modify: `/Users/paveltkacenko/projects/myprojects/KanbanBoard/wwwroot/js/components/BoardSettingsModal.js` (импорты, setup, шаблон)
+- Modify: `./wwwroot/js/components/BoardSettingsModal.js` (импорты, setup, шаблон)
 
 - [ ] В `wwwroot/js/components/BoardSettingsModal.js` расширить импорт стора. Найти фрагмент:
 ```js
@@ -3645,7 +3645,7 @@ import { store, isBoardOwner, upsertBoard, removeBoard, navigate, pushToast, loa
 
 - [ ] Запустить приложение:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet run
+cd . && dotnet run
 ```
 
 - [ ] Проверить создание колонки: открыть доску, «Настройки» → «Колонки», ввести `Ревью`, «Добавить». Ожидается: колонка появилась в списке модалки последней; закрыть модалку — колонка «Ревью» есть на доске справа.
@@ -3668,5 +3668,5 @@ cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && dotnet run
 
 - [ ] Закоммитить:
 ```bash
-cd /Users/paveltkacenko/projects/myprojects/KanbanBoard && git add wwwroot/js/components/BoardSettingsModal.js && git commit -m "Настройки доски: вкладка колонок с CRUD и перетаскиванием порядка"
+cd . && git add wwwroot/js/components/BoardSettingsModal.js && git commit -m "Настройки доски: вкладка колонок с CRUD и перетаскиванием порядка"
 ```
