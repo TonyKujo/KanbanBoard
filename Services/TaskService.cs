@@ -249,6 +249,14 @@ namespace KanbanBoard.Services
             return await GetTaskResponseAsync(boardId, task.TaskId, ct);
         }
 
+        public async Task<TaskResponse?> GetBoardTaskAsync(int boardId, int userId, int taskId, CancellationToken ct)
+        {
+            if (!await IsUserBoardMemberAsync(boardId, userId, ct))
+                return null;
+
+            return await GetTaskResponseAsync(boardId, taskId, ct);
+        }
+
         public async Task<List<TaskResponse>?> GetAllBoardTasksAsync(int boardId, int userId,  CancellationToken ct, int? statusId = null,  string? search = null)
         {
             if (!await IsUserBoardMemberAsync(boardId, userId, ct))
