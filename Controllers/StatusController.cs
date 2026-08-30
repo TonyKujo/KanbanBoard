@@ -69,6 +69,23 @@ namespace KanbanBoard.Controllers
             return Ok(result);
         }
 
+        [HttpPatch]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Route("api/boards/{boardId}/statuses/{statusId}/position")]
+        public async Task<IActionResult> MoveBoardStatus(int boardId, int statusId, [FromBody] StatusPositionRequest request, CancellationToken ct)
+        {
+            var userId = GetUserId();
+
+            var result = await _statusService.MoveStatusAsync(boardId, userId, statusId, request, ct);
+
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
         [HttpDelete]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

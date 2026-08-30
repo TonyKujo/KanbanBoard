@@ -57,6 +57,45 @@ namespace KanbanBoard.Services
 
         }
 
+        public async Task<List<StatusPositionResponse>?> MoveStatusAsync(int boardId, int userId, int statusId, StatusPositionRequest request, CancellationToken ct)
+        {
+            if (!await IsUserBoardOwnerAsync(boardId, userId, ct))
+                return null;
+
+            var statuses = await _db.Statuses
+                .Where(s => s.BoardId == boardId)
+                .OrderBy(s => s.Order)
+                .ThenBy(s => s.StatusId)
+                .ToListAsync(ct);
+
+            var movedStatus = statuses.FirstOrDefault(s => s.StatusId == statusId);
+            if (movedStatus == null)
+                return null;
+
+            statuses.Remove(movedStatus);
+
+            var position = request.Position;
+            if (position < 0)
+                position = 0;
+            if (position > statuses.Count)
+                position = statuses.Count;
+
+            statuses.Insert(position, movedStatus);
+
+            for (var i = 0; i < statuses.Count; i++)
+                statuses[i].Order = i;
+
+            await _db.SaveChangesAsync(ct);
+
+            return statuses
+                .Select(s => new StatusPositionResponse
+                {
+                    Id = s.StatusId,
+                    Order = s.Order
+                })
+                .ToList();
+        }
+
         public async Task<StatusResponse?> CreateStatusAsync(int boardId, int userId, StatusRequest request, CancellationToken ct)
         {
             if (!await IsUserBoardOwnerAsync(boardId, userId, ct))
