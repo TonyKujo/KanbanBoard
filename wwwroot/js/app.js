@@ -8,6 +8,7 @@ import Toast from '/js/components/Toast.js';
 import LoginPage from '/js/components/LoginPage.js';
 import Sidebar from '/js/components/Sidebar.js';
 import BoardsGrid from '/js/components/BoardsGrid.js';
+import BoardView from '/js/components/BoardView.js';
 
 // #/login | #/ | #/boards/{id} | #/boards/{id}/tasks/{taskId}
 function parseHash() {
@@ -45,7 +46,7 @@ window.addEventListener('hashchange', parseHash);
 
 const App = {
     name: 'App',
-    components: { Toast, LoginPage, Sidebar, BoardsGrid },
+    components: { Toast, LoginPage, Sidebar, BoardsGrid, BoardView },
     setup() {
         onMounted(async () => {
             setUnauthorizedHandler(() => {
@@ -84,7 +85,7 @@ const App = {
             <Sidebar />
             <main class="kb-main">
                 <BoardsGrid v-if="route.name === 'boards'" />
-                <div v-else class="kb-boot">{{ S.common.loading }}</div>
+                <BoardView v-else-if="route.name === 'board'" :key="route.boardId" :board-id="route.boardId" />
             </main>
         </div>
     `
