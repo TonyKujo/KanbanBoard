@@ -1,7 +1,7 @@
 import { ref, computed } from '/lib/vue.esm-browser.prod.js';
 import { S } from '/js/strings.js';
 import { api, LIMITS } from '/js/api.js';
-import { store, isBoardOwner, upsertBoard, removeBoard, navigate, pushToast, loadBoard } from '/js/store.js';
+import { store, isBoardOwner, upsertBoard, removeBoard, navigate, pushToast, loadBoard, applyStatusPositions, sortStatuses } from '/js/store.js';
 import { initials, avatarStyle } from '/js/ui.js';
 
 export default {
@@ -72,6 +72,105 @@ export default {
             }
         }
 
+        // --- Колонки ---
+        const newColumnName = ref('');
+        const editingStatusId = ref(null);
+        const editingName = ref('');
+        const dragStatusId = ref(null);
+        const dragOverStatusId = ref(null);
+        const columnsEl = ref(null);
+
+        function columnError(e) {
+            if (e.status === 404) return S.errors.modalNotFound;
+            if (e.status === 409) return e.message || S.errors.conflict;
+            return e.message;
+        }
+
+        async function addColumn() {
+            if (busy.value) return;
+            busy.value = true;
+            error.value = '';
+            try {
+                const created = await api.createStatus(boardId.value, newColumnName.value);
+                store.statuses.push(created);
+                sortStatuses();
+                newColumnName.value = '';
+            } catch (e) {
+                error.value = columnError(e);
+            } finally {
+                busy.value = false;
+            }
+        }
+
+        function startRename(status) {
+            editingStatusId.value = status.statusId;
+            editingName.value = status.statusName;
+        }
+
+        async function saveRename(status) {
+            if (busy.value) return;
+            busy.value = true;
+            error.value = '';
+            try {
+                const updated = await api.renameStatus(boardId.value, status.statusId, editingName.value);
+                const i = store.statuses.findIndex((s) => s.statusId === status.statusId);
+                if (i >= 0) store.statuses[i] = updated;
+                editingStatusId.value = null;
+            } catch (e) {
+                error.value = columnError(e);
+            } finally {
+                busy.value = false;
+            }
+        }
+
+        async function deleteColumn(status) {
+            if (busy.value) return;
+            busy.value = true;
+            error.value = '';
+            try {
+                await api.deleteStatus(boardId.value, status.statusId);
+                const i = store.statuses.findIndex((s) => s.statusId === status.statusId);
+                if (i >= 0) store.statuses.splice(i, 1);
+                applyStatusPositions(store.statuses.map((s, idx) => ({ id: s.statusId, order: idx })));
+            } catch (e) {
+                error.value = columnError(e);
+            } finally {
+                busy.value = false;
+            }
+        }
+
+        function onColumnDragStart(status) {
+            dragStatusId.value = status.statusId;
+        }
+
+        function onColumnDragOver(status, event) {
+            if (dragStatusId.value === null) return;
+            event.preventDefault();
+            dragOverStatusId.value = status.statusId;
+        }
+
+        async function onColumnDrop(status) {
+            const movedId = dragStatusId.value;
+            dragStatusId.value = null;
+            dragOverStatusId.value = null;
+            if (!movedId || movedId === status.statusId) return;
+
+            // Position — индекс в списке колонок ПОСЛЕ изъятия перемещаемой колонки.
+            const rest = store.statuses.filter((s) => s.statusId !== movedId);
+            const position = rest.findIndex((s) => s.statusId === status.statusId);
+            if (position < 0) return;
+
+            error.value = '';
+            try {
+                const affected = await api.moveStatus(boardId.value, movedId, position);
+                applyStatusPositions(affected);
+            } catch (e) {
+                error.value = columnError(e);
+                pushToast(S.errors.moveColumnFailed, 'error');
+                await loadBoard(boardId.value);
+            }
+        }
+
         // --- О доске ---
         const boardName = ref(store.board ? store.board.nameOfBoard : '');
         const boardDescription = ref(store.board ? store.board.description || '' : '');
@@ -116,6 +215,8 @@ export default {
         return {
             S, LIMITS, store, tab, error, busy, owner,
             memberLogin, suggestions, searchMembers, pickSuggestion, addMember, removeMember, isOwnerUser,
+            newColumnName, editingStatusId, editingName, dragStatusId, dragOverStatusId, columnsEl,
+            addColumn, startRename, saveRename, deleteColumn, onColumnDragStart, onColumnDragOver, onColumnDrop,
             boardName, boardDescription, fieldErrors, saveBoard, deleteBoard,
             initials, avatarStyle
         };
@@ -131,6 +232,7 @@ export default {
                 <div class="kb-modal__body">
                     <div class="kb-tabs">
                         <button type="button" class="kb-tabs__item" :class="{ 'is-active': tab === 'members' }" @click="tab = 'members'">{{ S.settings.tabMembers }}</button>
+                        <button type="button" class="kb-tabs__item" :class="{ 'is-active': tab === 'columns' }" @click="tab = 'columns'">{{ S.settings.tabColumns }}</button>
                         <button type="button" class="kb-tabs__item" :class="{ 'is-active': tab === 'about' }" @click="tab = 'about'">{{ S.settings.tabAbout }}</button>
                     </div>
 
@@ -153,6 +255,39 @@ export default {
                             </ul>
                             <div class="kb-comment-form__row">
                                 <button type="button" class="kb-btn kb-btn--primary kb-btn--sm" :disabled="busy || !memberLogin.trim()" @click="addMember">{{ S.common.add }}</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else-if="tab === 'columns'">
+                        <div class="kb-empty kb-empty--sm" v-if="owner">{{ S.settings.columnsHint }}</div>
+                        <div ref="columnsEl">
+                            <div v-for="s in store.statuses"
+                                 :key="s.statusId"
+                                 class="kb-row"
+                                 :class="{ 'kb-row--drag': owner, 'is-over': dragOverStatusId === s.statusId }"
+                                 :draggable="owner && editingStatusId !== s.statusId"
+                                 @dragstart="onColumnDragStart(s)"
+                                 @dragover="onColumnDragOver(s, $event)"
+                                 @drop.prevent="onColumnDrop(s)">
+                                <template v-if="editingStatusId === s.statusId">
+                                    <input class="kb-input" v-model="editingName" :maxlength="LIMITS.columnName" />
+                                    <button type="button" class="kb-btn kb-btn--primary kb-btn--sm" :disabled="busy" @click="saveRename(s)">{{ S.common.save }}</button>
+                                    <button type="button" class="kb-btn kb-btn--sm" @click="editingStatusId = null">{{ S.common.cancel }}</button>
+                                </template>
+                                <template v-else>
+                                    <span class="kb-row__main">{{ s.statusName }}</span>
+                                    <button v-if="owner" type="button" class="kb-btn kb-btn--ghost kb-btn--sm" @click="startRename(s)">{{ S.common.edit }}</button>
+                                    <button v-if="owner" type="button" class="kb-btn kb-btn--ghost kb-btn--sm" :disabled="busy" @click="deleteColumn(s)">{{ S.common.remove }}</button>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div v-if="owner" class="kb-field" style="margin-top:16px">
+                            <label class="kb-field__label">{{ S.settings.addColumn }}</label>
+                            <input class="kb-input" v-model="newColumnName" :maxlength="LIMITS.columnName" :placeholder="S.settings.columnName" />
+                            <div class="kb-comment-form__row">
+                                <button type="button" class="kb-btn kb-btn--primary kb-btn--sm" :disabled="busy || !newColumnName.trim()" @click="addColumn">{{ S.common.add }}</button>
                             </div>
                         </div>
                     </div>
