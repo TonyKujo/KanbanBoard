@@ -125,6 +125,23 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Route("api/boards/{boardId}/tasks/{taskId}/position")]
+        public async Task<IActionResult> MoveTask(int boardId, int taskId, [FromBody] TaskPositionRequest request, CancellationToken ct)
+        {
+            var userId = GetUserId();
+
+            var result = await _taskService.MoveTaskAsync(boardId, userId, taskId, request, ct);
+
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+
+        [HttpPatch]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Route("api/boards/{boardId}/tasks/{taskId}/status")]
         public async Task<IActionResult> ChangeStatus(int boardId, int taskId, [FromBody] StatusHistoryRequest request, CancellationToken ct)
         {

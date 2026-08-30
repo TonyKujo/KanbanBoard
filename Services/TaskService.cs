@@ -75,6 +75,86 @@ namespace KanbanBoard.Services
             return await _db.Boards.AnyAsync(b => b.BoardId == boardId && b.AuthorId == userId, ct);
         }
 
+        public async Task<List<TaskPositionResponse>?> MoveTaskAsync(int boardId, int userId, int taskId, TaskPositionRequest request, CancellationToken ct)
+        {
+            var currentBoardUser = await _db.BoardUsers
+                .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
+            if (currentBoardUser == null)
+                return null;
+
+            var movedTask = await _db.Tasks
+                .FirstOrDefaultAsync(t => t.TaskId == taskId && t.BoardId == boardId, ct);
+            if (movedTask == null)
+                return null;
+
+            var targetStatus = await _db.Statuses
+                .FirstOrDefaultAsync(s => s.StatusId == request.StatusId && s.BoardId == boardId, ct);
+            if (targetStatus == null)
+                return null;
+
+            var sourceStatusId = movedTask.StatusId;
+            var isStatusChanged = sourceStatusId != targetStatus.StatusId;
+
+            var targetTasks = await _db.Tasks
+                .Where(t => t.BoardId == boardId && t.StatusId == targetStatus.StatusId && t.TaskId != taskId)
+                .OrderBy(t => t.Order)
+                .ThenBy(t => t.TaskId)
+                .ToListAsync(ct);
+
+            var sourceTasks = new List<Task>();
+
+            if (isStatusChanged)
+            {
+                sourceTasks = await _db.Tasks
+                    .Where(t => t.BoardId == boardId && t.StatusId == sourceStatusId && t.TaskId != taskId)
+                    .OrderBy(t => t.Order)
+                    .ThenBy(t => t.TaskId)
+                    .ToListAsync(ct);
+            }
+
+            var position = request.Position;
+            if (position < 0)
+                position = 0;
+            if (position > targetTasks.Count)
+                position = targetTasks.Count;
+
+            movedTask.StatusId = targetStatus.StatusId;
+            targetTasks.Insert(position, movedTask);
+
+            for (var i = 0; i < targetTasks.Count; i++)
+                targetTasks[i].Order = i;
+
+            for (var i = 0; i < sourceTasks.Count; i++)
+                sourceTasks[i].Order = i;
+
+            if (isStatusChanged)
+            {
+                var history = new TaskStatusHistory
+                {
+                    TaskId = movedTask.TaskId,
+                    StatusId = targetStatus.StatusId,
+                    AuthorId = currentBoardUser.BoardUserId,
+                    ChangeDate = DateTime.UtcNow
+                };
+
+                _db.TaskStatusHistories.Add(history);
+            }
+
+            await _db.SaveChangesAsync(ct);
+
+            var affectedTasks = new List<Task>(targetTasks);
+            affectedTasks.AddRange(sourceTasks);
+
+            return affectedTasks
+                .Select(t => new TaskPositionResponse
+                {
+                    Id = t.TaskId,
+                    StatusId = t.StatusId,
+                    Order = t.Order
+                })
+                .ToList();
+        }
+
         public async Task<StatusHistoryResponse?> ChangeTaskStatusAsync(int boardId, int userId, int taskId, StatusHistoryRequest request ,CancellationToken ct)
         {
             var workerFromThisBoard = await _db.BoardUsers
