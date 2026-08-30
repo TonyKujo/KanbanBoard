@@ -63,10 +63,3 @@ export function toLocalInputValue(value) {
     const pad = (n) => String(n).padStart(2, '0');
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-
-export function formatSize(bytes) {
-    if (!bytes && bytes !== 0) return '';
-    if (bytes < 1024) return bytes + ' Б';
-    if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' КБ';
-    return (bytes / 1024 / 1024).toFixed(1) + ' МБ';
-}

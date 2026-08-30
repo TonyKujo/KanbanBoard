@@ -8,6 +8,7 @@ export const LIMITS = {
     columnName: 100,
     description: 3000,
     comment: 10000,
+    fileName: 100,
     login: 100,
     passwordMin: 6
 };
@@ -22,11 +23,18 @@ export class ApiError extends Error {
     }
 }
 
-let onUnauthorized = null;
+let unauthorizedHandler = null;
+let unauthorizedFired = false;
 
 // Обработчик 401 регистрирует app.js — так api.js не зависит от store.js и роутера.
 export function setUnauthorizedHandler(fn) {
-    onUnauthorized = fn;
+    unauthorizedHandler = fn;
+    unauthorizedFired = false;
+}
+
+// Успешный логин снова разрешает срабатывание обработчика.
+export function resetUnauthorized() {
+    unauthorizedFired = false;
 }
 
 function defaultMessage(status) {
@@ -63,12 +71,13 @@ async function normalizeError(response) {
             }
             message = S.errors.validation;
         }
-    } else {
+    } else if (contentType.includes('text/plain')) {
         try {
             message = (await response.text()).trim();
         } catch (e) {
             message = '';
         }
+        if (message.length > 200) message = '';
     }
 
     if (!message) message = defaultMessage(status);
@@ -97,8 +106,9 @@ async function request(method, url, options) {
     if (!response.ok) {
         const error = await normalizeError(response);
         console.error('[api]', method, url, error.status, error.message, error.fieldErrors);
-        if (error.status === 401 && !opts.skipAuthRedirect && onUnauthorized) {
-            onUnauthorized();
+        if (error.status === 401 && !opts.skipAuthRedirect && unauthorizedHandler && !unauthorizedFired) {
+            unauthorizedFired = true;
+            unauthorizedHandler();
         }
         throw error;
     }
@@ -149,14 +159,14 @@ export const api = {
     },
     login(login, password) {
         assertValid({ login: required(login) || tooLong(login, LIMITS.login), password: required(password) });
-        return request('POST', '/api/auth/login', { body: { login, password }, skipAuthRedirect: true });
+        return request('POST', '/api/auth/login', { body: { login, password }, skipAuthRedirect: true }).then((r) => { resetUnauthorized(); return r; });
     },
     register(login, password) {
         assertValid({
             login: required(login) || tooLong(login, LIMITS.login),
             password: required(password) || ((password || '').length < LIMITS.passwordMin ? S.errors.passwordShort : null)
         });
-        return request('POST', '/api/auth/register', { body: { login, password }, skipAuthRedirect: true });
+        return request('POST', '/api/auth/register', { body: { login, password }, skipAuthRedirect: true }).then((r) => { resetUnauthorized(); return r; });
     },
     logout() {
         return request('POST', '/api/auth/logout', { skipAuthRedirect: true });
@@ -293,11 +303,13 @@ export const api = {
         return request('GET', `/api/boards/${boardId}/tasks/${taskId}/attachments`);
     },
     uploadTaskAttachment(boardId, taskId, file) {
+        assertValid({ file: tooLong(file.name, LIMITS.fileName) });
         const fd = new FormData();
         fd.append('file', file);
         return request('POST', `/api/boards/${boardId}/tasks/${taskId}/attachments`, { formData: fd });
     },
     uploadCommentAttachment(boardId, commentId, file) {
+        assertValid({ file: tooLong(file.name, LIMITS.fileName) });
         const fd = new FormData();
         fd.append('file', file);
         return request('POST', `/api/boards/${boardId}/comments/${commentId}/attachments`, { formData: fd });
