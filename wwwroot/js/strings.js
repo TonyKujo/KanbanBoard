@@ -128,6 +128,8 @@ export const S = {
         moveColumnFailed: 'Не удалось переместить колонку',
         commentFailed: 'Не удалось отправить комментарий',
         uploadFailed: 'Не удалось загрузить файл',
-        userNotFound: 'Пользователь не найден'
+        userNotFound: 'Пользователь не найден',
+        selfAlreadyMember: 'Вы уже добавлены в эту доску',
+        memberAlreadyAdded: 'Пользователь уже добавлен в доску'
     }
 };

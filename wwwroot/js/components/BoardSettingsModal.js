@@ -43,6 +43,16 @@ export default {
 
         async function addMember() {
             if (busy.value) return;
+
+            // Бек молча «переподтверждает» существующего участника — даём явный отклик.
+            const login = memberLogin.value.trim();
+            const existing = store.members.find((m) => m.login === login);
+            if (existing) {
+                const isSelf = store.user && existing.userId === store.user.userId;
+                pushToast(isSelf ? S.errors.selfAlreadyMember : S.errors.memberAlreadyAdded, 'error');
+                return;
+            }
+
             busy.value = true;
             error.value = '';
             try {
