@@ -8,7 +8,7 @@ namespace KanbanBoard.Controllers
 {
     [ApiController]
     [Authorize]
-    [Route("api/boards/{boardId}/tasks/{taskId}/comments")]
+    [Route("api/boards/{boardId:int}/tasks/{taskId:int}/comments")]
     public class CommentController(CommentService commentService) : Controller
     {
         private readonly CommentService _commentService = commentService;
@@ -57,7 +57,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("{commentId}")]
+        [Route("{commentId:int}")]
         public async Task<IActionResult> DeleteTaskComment(int boardId, int taskId, int commentId, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -74,7 +74,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("{commentId}")]
+        [Route("{commentId:int}")]
         public async Task<IActionResult> UpdateTaskComment(int boardId, int taskId, int commentId, [FromBody] CommentRequest request, CancellationToken ct)
         {
             var userId = GetUserId();

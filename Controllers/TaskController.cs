@@ -8,7 +8,7 @@ namespace KanbanBoard.Controllers
 {
     [ApiController]
     [Authorize]
-    [Route("api/boards/{boardId}/tasks")]
+    [Route("api/boards/{boardId:int}/tasks")]
     public class TaskController(TaskService taskService) : Controller
     {
         private readonly TaskService _taskService = taskService;
@@ -39,7 +39,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("{taskId}")]
+        [Route("{taskId:int}")]
         public async Task<IActionResult> GetBoardTask(int boardId, int taskId, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -56,7 +56,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("{taskId}/history")]
+        [Route("{taskId:int}/history")]
         public async Task<IActionResult> GetTaskHistory(int boardId, int taskId, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -111,7 +111,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("{taskId}")]
+        [Route("{taskId:int}")]
         public async Task<IActionResult> DeleteTask(int boardId, int taskId, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -126,7 +126,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("{taskId}/position")]
+        [Route("{taskId:int}/position")]
         public async Task<IActionResult> MoveTask(int boardId, int taskId, [FromBody] TaskPositionRequest request, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -143,7 +143,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("{taskId}/status")]
+        [Route("{taskId:int}/status")]
         public async Task<IActionResult> ChangeStatus(int boardId, int taskId, [FromBody] StatusHistoryRequest request, CancellationToken ct)
         {
             var userId = GetUserId();
