@@ -21,10 +21,11 @@ namespace KanbanBoard.Models
         public int BoardId { get; set; }
         public DateTime CreationDate { get; set; }
         public DateTime DeadLine { get; set; }
+        public int Order { get; set; }
 
         public BoardUser Author { get; set; } = null!;
 
-        public BoardUser Assignee { get; set; } = null!;
+        public BoardUser? Assignee { get; set; }
 
         
         public Board Board { get; set; } = null!;
