@@ -179,3 +179,75 @@ export function bumpCounter(taskId, field, delta) {
         store.task[field] = Math.max(0, (store.task[field] || 0) + delta);
     }
 }
+
+// --- Drag & drop: оптимистичное перемещение ---
+
+export function isTaskMoving(taskId) {
+    return store.movingTaskIds.includes(taskId);
+}
+
+function statusById(statusId) {
+    return store.statuses.find((s) => s.statusId === statusId) || null;
+}
+
+function reindex(statusId) {
+    const list = sortTasks(store.tasks.filter((t) => t.status.statusId === statusId));
+    list.forEach((t, i) => { t.order = i; });
+}
+
+// Position — 0-based индекс в целевой колонке ПОСЛЕ изъятия перемещаемой задачи.
+function applyLocalMove(task, targetStatusId, position) {
+    const sourceStatusId = task.status.statusId;
+    const target = statusById(targetStatusId);
+    if (!target) return;
+
+    const rest = sortTasks(store.tasks.filter((t) => t.status.statusId === targetStatusId && t.taskId !== task.taskId));
+    const index = Math.max(0, Math.min(position, rest.length));
+
+    task.status = target;
+    rest.splice(index, 0, task);
+    rest.forEach((t, i) => { t.order = i; });
+
+    if (sourceStatusId !== targetStatusId) reindex(sourceStatusId);
+}
+
+// Ответ сервера: [{ id, statusId, order }] по всем затронутым задачам.
+export function applyTaskPositions(affected) {
+    for (const item of affected || []) {
+        const task = store.tasks.find((t) => t.taskId === item.id);
+        if (!task) continue;
+        const status = statusById(item.statusId);
+        if (status) task.status = status;
+        task.order = item.order;
+    }
+}
+
+export async function moveTask(taskId, targetStatusId, position) {
+    if (!store.board) return;
+    if (isTaskMoving(taskId)) return;                      // на карточку — один запрос в полёте
+
+    const task = store.tasks.find((t) => t.taskId === taskId);
+    if (!task) return;
+    if (task.status.statusId === targetStatusId) {
+        const current = sortTasks(store.tasks.filter((t) => t.status.statusId === targetStatusId));
+        const currentIndex = current.findIndex((t) => t.taskId === taskId);
+        const rest = current.length - 1;
+        if (currentIndex === Math.max(0, Math.min(position, rest))) return;  // ничего не меняется
+    }
+
+    const snapshot = store.tasks.map((t) => ({ id: t.taskId, statusId: t.status.statusId, order: t.order }));
+
+    applyLocalMove(task, targetStatusId, position);
+    store.movingTaskIds.push(taskId);
+
+    try {
+        const affected = await api.moveTask(store.board.boardId, taskId, targetStatusId, position);
+        applyTaskPositions(affected);
+    } catch (e) {
+        applyTaskPositions(snapshot);
+        if (e.status !== 401) pushToast(S.errors.moveFailed, 'error');
+    } finally {
+        const i = store.movingTaskIds.indexOf(taskId);
+        if (i >= 0) store.movingTaskIds.splice(i, 1);
+    }
+}
