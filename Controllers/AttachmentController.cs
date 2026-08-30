@@ -115,7 +115,7 @@ namespace KanbanBoard.Controllers
 
             var result = await _attachmentService.DeleteAttachmentAsync(boardId, userId, attachmentId, ct);
 
-            if (result == false)
+            if (!result)
                 return NotFound();
             return NoContent();
         }
