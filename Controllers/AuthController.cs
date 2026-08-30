@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace KanbanBoard.Controllers
 {
+    [ApiController]
+    [Route("api/auth")]
     public class AuthController : Controller
     {
         private readonly AuthService _authService;
@@ -20,15 +22,15 @@ namespace KanbanBoard.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [Route("api/auth/login")]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest model, CancellationToken ct)
         {
             var user = await _authService.Login(model, ct);
 
             if (user == null)
             {
-                return Conflict("Такой логин отсутствует");
+                return Unauthorized("Неверный логин или пароль");
             }
 
             await SignInUser(user);
@@ -40,7 +42,7 @@ namespace KanbanBoard.Controllers
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [Route("api/auth/register")]
+        [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest model, CancellationToken ct)
         {
             var user = await _authService.Register(model, ct);
@@ -56,24 +58,35 @@ namespace KanbanBoard.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [Route("api/auth/me")]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Route("me")]
         public async Task<IActionResult> UserInfo(CancellationToken ct)
         {
             var login = User.FindFirstValue(ClaimTypes.Name);
 
             if (login == null)
             {
-                return BadRequest("Не поняли кто!");
+                return Unauthorized("Не авторизован");
             }
 
             var result = await _authService.GetUserInfo(login, ct);
+
+            if (result == null)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return Unauthorized("Не авторизован");
+            }
 
             return Ok(result);
         }
 
         [HttpPost]
-        [Route("api/auth/logout")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Route("logout")]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

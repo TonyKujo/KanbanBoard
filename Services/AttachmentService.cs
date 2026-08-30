@@ -116,7 +116,6 @@ namespace KanbanBoard.Services
                     AttachmentId = a.AttachmentId,
                     DateOfUpload = a.DateOfUpload,
                     FileName = a.FileName,
-                    FilePath = a.FilePath,
                     Uploader = new UserResponse
                     {
                         Login = a.Uploader.User.Login,
@@ -140,7 +139,6 @@ namespace KanbanBoard.Services
                     AttachmentId = a.AttachmentId,
                     DateOfUpload = a.DateOfUpload,
                     FileName = a.FileName,
-                    FilePath = a.FilePath,
                     Uploader = new UserResponse
                     {
                         Login = a.Uploader.User.Login,
@@ -237,7 +235,6 @@ namespace KanbanBoard.Services
                 AttachmentId = attachment.AttachmentId,
                 DateOfUpload = attachment.DateOfUpload,
                 FileName = attachment.FileName,
-                FilePath = attachment.FilePath,
                 Uploader = new UserResponse
                 {
                     UserId = uploader.UserId,

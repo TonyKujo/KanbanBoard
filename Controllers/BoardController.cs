@@ -6,7 +6,9 @@ using System.Security.Claims;
 
 namespace KanbanBoard.Controllers
 {
+    [ApiController]
     [Authorize]
+    [Route("api/boards")]
     public class BoardController(BoardService boardService) : Controller
     {
         private readonly BoardService _boardService = boardService;
@@ -22,7 +24,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("api/boards/{boardId}/users")]
+        [Route("{boardId:int}/users")]
         public async Task<IActionResult> GetBoardUsers(int boardId, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -39,7 +41,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route ("api/boards/{boardId}")]
+        [Route ("{boardId:int}")]
         public async Task<IActionResult> UpdateBoard(int boardId, [FromBody] BoardRequest request, CancellationToken ct)
         {
 
@@ -56,7 +58,7 @@ namespace KanbanBoard.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [Route("api/boards")]
+        [Route("")]
         public async Task<IActionResult> GetAllUserBoards(CancellationToken ct)
         {
             var userId = GetUserId();
@@ -68,7 +70,7 @@ namespace KanbanBoard.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [Route("api/boards")]
+        [Route("")]
         public async Task<IActionResult> AddNewBoard([FromBody] BoardRequest request, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -81,7 +83,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("api/boards/{boardId}")]
+        [Route("{boardId:int}")]
         public async Task<IActionResult> GetUserBoard(int boardId, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -96,7 +98,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("api/boards/{boardId}/users/{userId}")]
+        [Route("{boardId:int}/users/{userId:int}")]
         public async Task<IActionResult> RemoveBoardUser(int boardId, int userId, CancellationToken ct)
         {
             var currentUserId = GetUserId();
@@ -112,7 +114,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("api/boards/{boardId}/users")]
+        [Route("{boardId:int}/users")]
         public async Task<IActionResult> AddBoardUser(int boardId, [FromBody] BoardUserRequest request, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -128,7 +130,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [Route("api/boards/{boardId}")]
+        [Route("{boardId:int}")]
         public async Task<IActionResult> DeleteUserBoard (int boardId, CancellationToken ct)
         {
             var userId = GetUserId();

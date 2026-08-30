@@ -11,6 +11,7 @@ namespace KanbanBoard.Models
         public string StatusName { get; set; } = null!;
         [ForeignKey("Board")]
         public int BoardId { get; set; }
+        public int Order { get; set; }
 
 
         public Board Board { get; set; } = null!;

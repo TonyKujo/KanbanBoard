@@ -103,6 +103,7 @@ namespace KanbanBoard.Services
         public async Task<BoardResponse?> UpdateBoardAsync(int boardId, int userId, BoardRequest boardRequest, CancellationToken ct)
         {
             var board = await _db.Boards
+                .Include(b => b.Author)
                 .FirstOrDefaultAsync(b => b.BoardId == boardId && b.AuthorId == userId
                                         && b.BoardUsers.Any(bu => bu.UserId == userId && !bu.IsDeleted), ct);
 
@@ -120,7 +121,11 @@ namespace KanbanBoard.Services
                 BoardId = board.BoardId,
                 NameOfBoard = board.NameOfBoard,
                 Description = board.Description,
-                Author = new UserResponse { UserId = board.AuthorId },
+                Author = new UserResponse
+                {
+                    UserId = board.Author.UserId,
+                    Login = board.Author.Login
+                },
                 DateOfMade = board.DateOfMade
             };
         }
@@ -186,13 +191,18 @@ namespace KanbanBoard.Services
 
             await _statusService.CreateDefaultStatusesAsync(board.BoardId, ct);
 
+            var author = await _db.Users.FirstAsync(u => u.UserId == userId, ct);
 
             return new BoardResponse
             {
                 BoardId = board.BoardId,
                 NameOfBoard = board.NameOfBoard,
                 Description = board.Description,
-                Author = new UserResponse { UserId = board.AuthorId },
+                Author = new UserResponse
+                {
+                    UserId = author.UserId,
+                    Login = author.Login
+                },
                 DateOfMade = board.DateOfMade
             };
 
@@ -206,7 +216,11 @@ namespace KanbanBoard.Services
                 BoardId = b.BoardId,
                 NameOfBoard = b.NameOfBoard,
                 Description = b.Description,
-                Author = new UserResponse { UserId = b.AuthorId },
+                Author = new UserResponse
+                {
+                    UserId = b.Author.UserId,
+                    Login = b.Author.Login
+                },
                 DateOfMade = b.DateOfMade
             })
             .ToListAsync(ct);

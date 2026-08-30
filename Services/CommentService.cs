@@ -4,6 +4,7 @@ using KanbanBoard.Models.Requests;
 using KanbanBoard.Models.Responses;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata.Conventions;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace KanbanBoard.Services
@@ -16,6 +17,31 @@ namespace KanbanBoard.Services
         {
             _db = dbContext;
         }
+
+        private static readonly Expression<Func<Comment, CommentResponse>> ToCommentResponse = c => new CommentResponse
+        {
+            CommentId = c.CommentId,
+            TaskId = c.TaskId,
+            Text = c.Text,
+            MadeDate = c.DateOfMade,
+            IsEdited = c.IsEdited,
+            Author = new UserResponse
+            {
+                UserId = c.Author.UserId,
+                Login = c.Author.User.Login
+            },
+            Attachments = c.Attachments.Select(a => new AttachmentResponse
+            {
+                AttachmentId = a.AttachmentId,
+                FileName = a.FileName,
+                DateOfUpload = a.DateOfUpload,
+                Uploader = new UserResponse
+                {
+                    UserId = a.Uploader.UserId,
+                    Login = a.Uploader.User.Login
+                }
+            }).ToList()
+        };
 
         private async Task<bool> IsUserBoardMemberAsync(int boardId, int userId, CancellationToken ct)
         {
@@ -56,22 +82,10 @@ namespace KanbanBoard.Services
 
             await _db.SaveChangesAsync(ct);
 
-            var updatedComment = await _db.Comments
-                .Include(c => c.Author).ThenInclude(bu => bu.User)
-                .FirstAsync(c => c.CommentId == commentToUpdate.CommentId, ct);
-
-            return new CommentResponse
-            {
-                CommentId = updatedComment.CommentId,
-                Text = updatedComment.Text,
-                MadeDate = updatedComment.DateOfMade,
-                Author = new UserResponse
-                {
-                    UserId = updatedComment.Author.UserId,
-                    Login = updatedComment.Author.User.Login
-                },
-                IsEdited = updatedComment.IsEdited,
-            };
+            return await _db.Comments
+                .Where(c => c.CommentId == commentToUpdate.CommentId)
+                .Select(ToCommentResponse)
+                .FirstAsync(ct);
         }
 
         public async Task<bool> DeleteCommentFromTaskAsync(int boardId, int userId, int taskId, int commentId, CancellationToken ct)
@@ -135,22 +149,10 @@ namespace KanbanBoard.Services
 
             await _db.SaveChangesAsync(ct);
 
-            var createdComment = await _db.Comments
-                .Include(c => c.Author).ThenInclude(bu => bu.User)
-                .FirstAsync(c => c.CommentId == newComment.CommentId, ct);
-
-            return new CommentResponse
-            {
-                CommentId = newComment.CommentId,
-                Text = newComment.Text,
-                MadeDate = newComment.DateOfMade,
-                Author = new UserResponse
-                {
-                    UserId = createdComment.Author.UserId,
-                    Login = createdComment.Author.User.Login
-                },
-                IsEdited = createdComment.IsEdited,
-            };
+            return await _db.Comments
+                .Where(c => c.CommentId == newComment.CommentId)
+                .Select(ToCommentResponse)
+                .FirstAsync(ct);
 
         }
 
@@ -161,17 +163,19 @@ namespace KanbanBoard.Services
                 return null;
             }
 
+            var taskFromThisBoard = await _db.Tasks
+                .AnyAsync(t => t.TaskId == taskId && t.BoardId == boardId, ct);
+
+            if (!taskFromThisBoard)
+            {
+                return null;
+            }
+
             var comments = await _db.Comments
                 .Where(c => c.TaskId == taskId)
-                .Select(c => new CommentResponse
-                {
-                    Author = new UserResponse { Login = c.Author.User.Login, UserId = c.Author.UserId },
-                    CommentId = c.CommentId,
-                    MadeDate = c.DateOfMade,
-                    Text = c.Text,
-                    IsEdited = c.IsEdited,
-
-                })
+                .OrderBy(c => c.DateOfMade)
+                .ThenBy(c => c.CommentId)
+                .Select(ToCommentResponse)
                 .ToListAsync(ct);
 
             return comments;

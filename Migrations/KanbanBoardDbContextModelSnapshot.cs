@@ -170,6 +170,9 @@ namespace KanbanBoard.Migrations
                     b.Property<int>("BoardId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
                     b.Property<string>("StatusName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -204,6 +207,9 @@ namespace KanbanBoard.Migrations
 
                     b.Property<DateTime>("DeadLine")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
 
                     b.Property<int>("StatusId")
                         .HasColumnType("integer");

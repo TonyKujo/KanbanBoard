@@ -1,0 +1,94 @@
+/* Дизайн-токены KanbanBoard.
+   Светлая тема — «строгая»: белый фон, серо-синяя палитра, синий акцент, малые скругления.
+   Тёмная — «Linear»: графит, индиго-акцент, тонкие рамки вместо теней.
+   Три состояния темы: light / dark / system. При system атрибут data-theme не ставится,
+   поэтому тёмные значения описаны и в @media, и в [data-theme="dark"]. */
+
+:root {
+    --kb-bg: #f4f5f7;
+    --kb-surface: #ffffff;
+    --kb-surface-2: #eceef2;
+    --kb-surface-3: #e2e5ea;
+    --kb-border: #d6dae1;
+    --kb-border-strong: #b9c0ca;
+    --kb-text: #1b2333;
+    --kb-text-muted: #616c85;
+    --kb-text-faint: #8b95a8;
+    --kb-accent: #2563eb;
+    --kb-accent-hover: #1d4ed8;
+    --kb-accent-soft: #e5edff;
+    --kb-on-accent: #ffffff;
+    --kb-danger: #d32f2f;
+    --kb-danger-hover: #b02525;
+    --kb-danger-soft: #fdeaea;
+    --kb-warning: #b46a00;
+    --kb-warning-soft: #fdf1de;
+    --kb-success: #17803d;
+
+    --kb-radius: 4px;
+    --kb-radius-lg: 8px;
+    --kb-shadow: 0 1px 2px rgba(16, 24, 40, .08), 0 2px 8px rgba(16, 24, 40, .06);
+    --kb-shadow-lg: 0 12px 40px rgba(16, 24, 40, .20);
+    --kb-overlay: rgba(20, 26, 38, .42);
+
+    --kb-sidebar-w: 248px;
+    --kb-column-w: 288px;
+    --kb-panel-w: 58vw;
+
+    --kb-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --kb-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --kb-bg: #16181d;
+        --kb-surface: #1c1f26;
+        --kb-surface-2: #23262f;
+        --kb-surface-3: #2b2f3a;
+        --kb-border: #30343f;
+        --kb-border-strong: #434958;
+        --kb-text: #e5e7ee;
+        --kb-text-muted: #98a0b3;
+        --kb-text-faint: #757e93;
+        --kb-accent: #6366f1;
+        --kb-accent-hover: #7c7ff5;
+        --kb-accent-soft: #23244a;
+        --kb-on-accent: #ffffff;
+        --kb-danger: #ef5350;
+        --kb-danger-hover: #e03c39;
+        --kb-danger-soft: #3a1f1f;
+        --kb-warning: #e0a34a;
+        --kb-warning-soft: #382c19;
+        --kb-success: #4ade80;
+
+        --kb-shadow: none;
+        --kb-shadow-lg: 0 16px 48px rgba(0, 0, 0, .55);
+        --kb-overlay: rgba(8, 10, 14, .62);
+    }
+}
+
+:root[data-theme="dark"] {
+    --kb-bg: #16181d;
+    --kb-surface: #1c1f26;
+    --kb-surface-2: #23262f;
+    --kb-surface-3: #2b2f3a;
+    --kb-border: #30343f;
+    --kb-border-strong: #434958;
+    --kb-text: #e5e7ee;
+    --kb-text-muted: #98a0b3;
+    --kb-text-faint: #757e93;
+    --kb-accent: #6366f1;
+    --kb-accent-hover: #7c7ff5;
+    --kb-accent-soft: #23244a;
+    --kb-on-accent: #ffffff;
+    --kb-danger: #ef5350;
+    --kb-danger-hover: #e03c39;
+    --kb-danger-soft: #3a1f1f;
+    --kb-warning: #e0a34a;
+    --kb-warning-soft: #382c19;
+    --kb-success: #4ade80;
+
+    --kb-shadow: none;
+    --kb-shadow-lg: 0 16px 48px rgba(0, 0, 0, .55);
+    --kb-overlay: rgba(8, 10, 14, .62);
+}
