@@ -1,4 +1,4 @@
-using KanbanBoard.Models.Requests;
+﻿using KanbanBoard.Models.Requests;
 using KanbanBoard.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +8,7 @@ namespace KanbanBoard.Controllers
 {
     [ApiController]
     [Authorize]
+    [Route("api/boards/{boardId}/statuses")]
     public class StatusController(StatusService statusService) : Controller
     {
         private readonly StatusService _statusService = statusService;
@@ -22,7 +23,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("api/boards/{boardId}/statuses")]
+        [Route("")]
         public async Task<IActionResult> GetBoardStatuses(int boardId, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -39,7 +40,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("api/boards/{boardId}/statuses")]
+        [Route("")]
         public async Task<IActionResult> CreateBoardStatus(int boardId, [FromBody] StatusRequest request, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -56,7 +57,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("api/boards/{boardId}/statuses/{statusId}")]
+        [Route("{statusId}")]
         public async Task<IActionResult> UpdateBoardStatus(int boardId, int statusId, [FromBody] StatusRequest request, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -73,7 +74,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("api/boards/{boardId}/statuses/{statusId}/position")]
+        [Route("{statusId}/position")]
         public async Task<IActionResult> MoveBoardStatus(int boardId, int statusId, [FromBody] StatusPositionRequest request, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -91,7 +92,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [Route("api/boards/{boardId}/statuses/{statusId}")]
+        [Route("{statusId}")]
         public async Task<IActionResult> DeleteBoardStatus(int boardId, int statusId, CancellationToken ct)
         {
             var userId = GetUserId();

@@ -7,6 +7,7 @@ namespace KanbanBoard.Controllers
 {
     [ApiController]
     [Authorize]
+    [Route("api/boards/{boardId}")]
     public class AttachmentController(AttachmentService attachmentService) : Controller
     {
         private readonly AttachmentService _attachmentService = attachmentService;
@@ -21,7 +22,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("api/boards/{boardId}/tasks/{taskId}/attachments")]
+        [Route("tasks/{taskId}/attachments")]
         public async Task<IActionResult> AddAttachmentToTask(int boardId, int taskId, IFormFile file, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -39,7 +40,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("api/boards/{boardId}/comments/{commentId}/attachments")]
+        [Route("comments/{commentId}/attachments")]
         public async Task<IActionResult> AddAttachmentToComment(int boardId, int commentId, IFormFile file, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -56,7 +57,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("api/boards/{boardId}/comments/{commentId}/attachments")]
+        [Route("comments/{commentId}/attachments")]
         public async Task<IActionResult> GetCommentAttachments(int boardId, int commentId, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -73,7 +74,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("api/boards/{boardId}/tasks/{taskId}/attachments")]
+        [Route("tasks/{taskId}/attachments")]
         public async Task<IActionResult> GetTaskAttachments(int boardId, int taskId, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -90,7 +91,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("api/boards/{boardId}/attachments/{attachmentId}/download")]
+        [Route("attachments/{attachmentId}/download")]
         public async Task<IActionResult> DownloadAttachment(int boardId, int attachmentId, CancellationToken ct)
         {
             var userId = GetUserId();
@@ -107,7 +108,7 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Route("api/boards/{boardId}/attachments/{attachmentId}")]
+        [Route("attachments/{attachmentId}")]
         public async Task<IActionResult> DeleteAttachment(int boardId, int attachmentId, CancellationToken ct)
         {
             var userId = GetUserId();

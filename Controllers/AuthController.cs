@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace KanbanBoard.Controllers
 {
     [ApiController]
+    [Route("api/auth")]
     public class AuthController : Controller
     {
         private readonly AuthService _authService;
@@ -22,7 +23,7 @@ namespace KanbanBoard.Controllers
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [Route("api/auth/login")]
+        [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest model, CancellationToken ct)
         {
             var user = await _authService.Login(model, ct);
@@ -41,7 +42,7 @@ namespace KanbanBoard.Controllers
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [Route("api/auth/register")]
+        [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest model, CancellationToken ct)
         {
             var user = await _authService.Register(model, ct);
@@ -60,7 +61,7 @@ namespace KanbanBoard.Controllers
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [Route("api/auth/me")]
+        [Route("me")]
         public async Task<IActionResult> UserInfo(CancellationToken ct)
         {
             var login = User.FindFirstValue(ClaimTypes.Name);
@@ -85,7 +86,7 @@ namespace KanbanBoard.Controllers
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [Route("api/auth/logout")]
+        [Route("logout")]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
