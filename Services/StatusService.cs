@@ -28,10 +28,13 @@ namespace KanbanBoard.Services
 
             var boardStatuses = await _db.Statuses
                 .Where(s => s.BoardId == boardId)
+                .OrderBy(s => s.Order)
+                .ThenBy(s => s.StatusId)
                 .Select(s => new StatusResponse
                 {
                     StatusId = s.StatusId,
                     StatusName = s.StatusName,
+                    Order = s.Order,
                 })
                 .ToListAsync(ct);
 
@@ -44,9 +47,9 @@ namespace KanbanBoard.Services
         {
             var newStatuses = new List<Status>
             {
-                new Status { BoardId = boardId, StatusName = "To Do" },
-                new Status { BoardId = boardId, StatusName = "In Progress" },
-                new Status { BoardId = boardId, StatusName = "Done" },
+                new Status { BoardId = boardId, StatusName = "To Do", Order = 0 },
+                new Status { BoardId = boardId, StatusName = "In Progress", Order = 1 },
+                new Status { BoardId = boardId, StatusName = "Done", Order = 2 },
             };
 
 
