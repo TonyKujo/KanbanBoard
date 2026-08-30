@@ -161,6 +161,14 @@ namespace KanbanBoard.Services
                 return null;
             }
 
+            var taskFromThisBoard = await _db.Tasks
+                .AnyAsync(t => t.TaskId == taskId && t.BoardId == boardId, ct);
+
+            if (!taskFromThisBoard)
+            {
+                return null;
+            }
+
             var comments = await _db.Comments
                 .Where(c => c.TaskId == taskId)
                 .Select(c => new CommentResponse
