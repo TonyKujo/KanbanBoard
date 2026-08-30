@@ -1,4 +1,5 @@
-﻿using KanbanBoard.Data;
+﻿using System.Linq.Expressions;
+using KanbanBoard.Data;
 using KanbanBoard.Models;
 using KanbanBoard.Models.Requests;
 using KanbanBoard.Models.Responses;
@@ -25,11 +26,40 @@ namespace KanbanBoard.Services
             };
         }
 
+        private static readonly Expression<Func<Task, TaskResponse>> ToTaskResponse = t => new TaskResponse
+        {
+            TaskId = t.TaskId,
+            BoardId = t.BoardId,
+            TaskName = t.TaskName,
+            TaskDescription = t.TaskDescription,
+            Deadline = t.DeadLine,
+            DateOfMade = t.CreationDate,
+            Order = t.Order,
+            Status = new StatusResponse
+            {
+                StatusId = t.Status.StatusId,
+                StatusName = t.Status.StatusName,
+                Order = t.Status.Order
+            },
+            Worker = t.Assignee == null ? null : new UserResponse
+            {
+                UserId = t.Assignee.UserId,
+                Login = t.Assignee.User.Login
+            },
+            Author = new UserResponse
+            {
+                UserId = t.Author.UserId,
+                Login = t.Author.User.Login
+            },
+            CommentsCount = t.Comments.Count,
+            AttachmentsCount = t.Attachments.Count
+        };
+
         private async Task<TaskResponse?> GetTaskResponseAsync(int boardId, int taskId, CancellationToken ct)
         {
             return await _db.Tasks
                 .Where(t => t.BoardId == boardId && t.TaskId == taskId)
-                .SelectTaskResponse()
+                .Select(ToTaskResponse)
                 .FirstOrDefaultAsync(ct);
         }
 
@@ -241,7 +271,7 @@ namespace KanbanBoard.Services
             var tasks = await query
                 .OrderBy(t => t.Order)
                 .ThenBy(t => t.TaskId)
-                .SelectTaskResponse()
+                .Select(ToTaskResponse)
                 .ToListAsync(ct);
 
             return tasks;
