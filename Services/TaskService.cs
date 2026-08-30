@@ -77,12 +77,8 @@ namespace KanbanBoard.Services
 
         public async Task<StatusHistoryResponse?> ChangeTaskStatusAsync(int boardId, int userId, int taskId, StatusHistoryRequest request ,CancellationToken ct)
         {
-            if (!await IsUserBoardMemberAsync(boardId, userId, ct))
-            {
-                return null;
-            }
-
             var workerFromThisBoard = await _db.BoardUsers
+            .Include(bu => bu.User)
             .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
 
             if (workerFromThisBoard == null)
@@ -100,7 +96,12 @@ namespace KanbanBoard.Services
                 return null;
             }
 
+            var maxOrder = await _db.Tasks
+                .Where(t => t.StatusId == newStatus.StatusId && t.TaskId != changedTaskByStatus.TaskId)
+                .MaxAsync(t => (int?)t.Order, ct) ?? -1;
+
             changedTaskByStatus.StatusId = newStatus.StatusId;
+            changedTaskByStatus.Order = maxOrder + 1;
 
             var history = new TaskStatusHistory
             {
@@ -114,13 +115,20 @@ namespace KanbanBoard.Services
 
             return new StatusHistoryResponse
             {
+                StatusChangeId = history.StatusChangeId,
                 TaskId = changedTaskByStatus.TaskId,
                 Status = new StatusResponse
                 {
                     StatusId = newStatus.StatusId,
-                    StatusName = newStatus.StatusName
+                    StatusName = newStatus.StatusName,
+                    Order = newStatus.Order
                 },
-                LastStatusChangeDate = history.ChangeDate
+                LastStatusChangeDate = history.ChangeDate,
+                Author = new UserResponse
+                {
+                    UserId = workerFromThisBoard.UserId,
+                    Login = workerFromThisBoard.User.Login
+                }
             };
         }
 
@@ -247,6 +255,41 @@ namespace KanbanBoard.Services
             await _db.SaveChangesAsync(ct);
 
             return await GetTaskResponseAsync(boardId, task.TaskId, ct);
+        }
+
+        public async Task<List<StatusHistoryResponse>?> GetTaskHistoryAsync(int boardId, int userId, int taskId, CancellationToken ct)
+        {
+            if (!await IsUserBoardMemberAsync(boardId, userId, ct))
+                return null;
+
+            var taskFromThisBoard = await _db.Tasks
+                .AnyAsync(t => t.TaskId == taskId && t.BoardId == boardId, ct);
+
+            if (!taskFromThisBoard)
+                return null;
+
+            return await _db.TaskStatusHistories
+                .Where(h => h.TaskId == taskId)
+                .OrderByDescending(h => h.ChangeDate)
+                .ThenByDescending(h => h.StatusChangeId)
+                .Select(h => new StatusHistoryResponse
+                {
+                    StatusChangeId = h.StatusChangeId,
+                    TaskId = h.TaskId,
+                    Status = new StatusResponse
+                    {
+                        StatusId = h.Status.StatusId,
+                        StatusName = h.Status.StatusName,
+                        Order = h.Status.Order
+                    },
+                    LastStatusChangeDate = h.ChangeDate,
+                    Author = new UserResponse
+                    {
+                        UserId = h.Author.UserId,
+                        Login = h.Author.User.Login
+                    }
+                })
+                .ToListAsync(ct);
         }
 
         public async Task<TaskResponse?> GetBoardTaskAsync(int boardId, int userId, int taskId, CancellationToken ct)
