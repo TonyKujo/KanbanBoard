@@ -67,7 +67,15 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // Браузер обязан ревалидировать js/css при каждой загрузке —
+        // иначе правки фронта не видны по F5 из-за эвристического кэша.
+        ctx.Context.Response.Headers.CacheControl = "no-cache";
+    }
+});
 
 app.UseRouting();
 
