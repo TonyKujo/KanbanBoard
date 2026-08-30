@@ -16,6 +16,16 @@ namespace KanbanBoard.Services
             _db = dbContext;
         }
 
+        private static DateTime NormalizeUtc(DateTime value)
+        {
+            return value.Kind switch
+            {
+                DateTimeKind.Utc => value,
+                DateTimeKind.Local => value.ToUniversalTime(),
+                _ => DateTime.SpecifyKind(value, DateTimeKind.Utc)
+            };
+        }
+
         private static readonly Expression<Func<Task, TaskResponse>> ToTaskResponse = t => new TaskResponse
         {
             TaskId = t.TaskId,
@@ -143,9 +153,6 @@ namespace KanbanBoard.Services
 
         public async Task<TaskResponse?> UpdateTaskAsync(int boardId, int userId, int taskId, TaskRequest request, CancellationToken ct)
         {
-            if (!await IsUserBoardMemberAsync(boardId, userId, ct))
-                return null;
-
             var currentBoardUser = await _db.BoardUsers
                 .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
             if (currentBoardUser == null)
@@ -156,70 +163,51 @@ namespace KanbanBoard.Services
             if (task == null)
                 return null;
 
-            var workerFromThisBoard = await _db.BoardUsers
-                .FirstOrDefaultAsync(bu => bu.UserId == request.WorkerId && bu.BoardId == boardId && !bu.IsDeleted, ct);
-            if (workerFromThisBoard == null)
-                return null;
+            int? assigneeId = null;
+
+            if (request.WorkerId.HasValue)
+            {
+                var workerFromThisBoard = await _db.BoardUsers
+                    .FirstOrDefaultAsync(bu => bu.UserId == request.WorkerId.Value && bu.BoardId == boardId && !bu.IsDeleted, ct);
+                if (workerFromThisBoard == null)
+                    return null;
+
+                assigneeId = workerFromThisBoard.BoardUserId;
+            }
 
             task.TaskName = request.TaskName;
             task.TaskDescription = request.TaskDescription;
-            task.DeadLine = request.Deadline;
-            task.Assignee = workerFromThisBoard;
+            task.DeadLine = NormalizeUtc(request.Deadline!.Value);
+            task.AssigneeId = assigneeId;
 
             await _db.SaveChangesAsync(ct);
 
-            var updatedTask = await _db.Tasks
-                .Include(t => t.Status)
-                .Include(t => t.Author).ThenInclude(bu => bu.User)
-                .Include(t => t.Assignee).ThenInclude(bu => bu.User)
-                .FirstAsync(t => t.TaskId == taskId, ct);
-
-            return new TaskResponse
-            {
-                TaskId = updatedTask.TaskId,
-                TaskName = updatedTask.TaskName,
-                TaskDescription = updatedTask.TaskDescription,
-                Deadline = updatedTask.DeadLine,
-                DateOfMade = updatedTask.CreationDate,
-                Status = new StatusResponse
-                {
-                    StatusId = updatedTask.Status.StatusId,
-                    StatusName = updatedTask.Status.StatusName
-                },
-                Author = new UserResponse
-                {
-                    UserId = updatedTask.Author.UserId,
-                    Login = updatedTask.Author.User.Login
-                },
-                Worker = new UserResponse
-                {
-                    UserId = updatedTask.Assignee.UserId,
-                    Login = updatedTask.Assignee.User.Login
-                }
-
-            };
+            return await GetTaskResponseAsync(boardId, taskId, ct);
         }
 
         public async Task<TaskResponse?> CreateTaskAsync(int boardId, int userId, TaskRequest request,  CancellationToken ct)
         {
-            if(!await IsUserBoardMemberAsync(boardId, userId, ct))
-            {
-                return null;
-            }
-
-
-            var workerFromThisBoard = await _db.BoardUsers
-            .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
-
             var authorFromThisBoard = await _db.BoardUsers
             .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == userId && !bu.IsDeleted, ct);
 
-            if (workerFromThisBoard == null || authorFromThisBoard == null)
+            if (authorFromThisBoard == null)
                 return null;
+
+            BoardUser? workerFromThisBoard = null;
+
+            if (request.WorkerId.HasValue)
+            {
+                workerFromThisBoard = await _db.BoardUsers
+                    .FirstOrDefaultAsync(bu => bu.BoardId == boardId && bu.UserId == request.WorkerId.Value && !bu.IsDeleted, ct);
+
+                if (workerFromThisBoard == null)
+                    return null;
+            }
 
             var defaultStatus = await _db.Statuses
                 .Where(s => s.BoardId == boardId)
-                .OrderBy(s => s.StatusId)
+                .OrderBy(s => s.Order)
+                .ThenBy(s => s.StatusId)
                 .FirstOrDefaultAsync(ct);
 
             if (defaultStatus == null)
@@ -227,54 +215,38 @@ namespace KanbanBoard.Services
                 return null;
             }
 
+            var maxOrder = await _db.Tasks
+                .Where(t => t.StatusId == defaultStatus.StatusId)
+                .MaxAsync(t => (int?)t.Order, ct) ?? -1;
+
             var task = new Task
             {
                 TaskName = request.TaskName,
                 TaskDescription = request.TaskDescription,
-                AssigneeId = workerFromThisBoard.BoardUserId,
+                AssigneeId = workerFromThisBoard?.BoardUserId,
                 AuthorId = authorFromThisBoard.BoardUserId,
                 BoardId = boardId,
                 StatusId = defaultStatus.StatusId,
-                DeadLine = request.Deadline,
+                Order = maxOrder + 1,
+                DeadLine = NormalizeUtc(request.Deadline!.Value),
                 CreationDate = DateTime.UtcNow,
             };
-
-            
 
             _db.Tasks.Add(task);
             await _db.SaveChangesAsync(ct);
 
-            var createdTask = await _db.Tasks
-            .Include(t => t.Status)
-            .Include(t => t.Author).ThenInclude(bu => bu.User)
-            .Include(t => t.Assignee).ThenInclude(bu => bu.User)
-            .FirstAsync(t => t.TaskId == task.TaskId, ct);
-
-            return new TaskResponse
+            var history = new TaskStatusHistory
             {
-                TaskId = createdTask.TaskId,
-                TaskName = createdTask.TaskName,
-                TaskDescription = createdTask.TaskDescription,
-                Deadline = createdTask.DeadLine,
-                DateOfMade = createdTask.CreationDate,
-                Status = new StatusResponse
-                {
-                    StatusId = createdTask.Status.StatusId,
-                    StatusName = createdTask.Status.StatusName
-                },
-                Author = new UserResponse
-                {
-                    UserId = createdTask.Author.UserId,
-                    Login = createdTask.Author.User.Login
-                },
-                Worker = new UserResponse
-                {
-                    UserId = createdTask.Assignee.UserId,
-                    Login = createdTask.Assignee.User.Login
-                }
-
+                TaskId = task.TaskId,
+                StatusId = defaultStatus.StatusId,
+                AuthorId = authorFromThisBoard.BoardUserId,
+                ChangeDate = task.CreationDate
             };
 
+            _db.TaskStatusHistories.Add(history);
+            await _db.SaveChangesAsync(ct);
+
+            return await GetTaskResponseAsync(boardId, task.TaskId, ct);
         }
 
         public async Task<List<TaskResponse>?> GetAllBoardTasksAsync(int boardId, int userId,  CancellationToken ct, int? statusId = null,  string? search = null)

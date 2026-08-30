@@ -11,8 +11,9 @@ namespace KanbanBoard.Models.Requests
         [MaxLength(3000)]
         public string? TaskDescription { get; set; }
 
-        public DateTime Deadline { get; set; }
+        [Required]
+        public DateTime? Deadline { get; set; }
 
-        public int WorkerId { get; set; }
+        public int? WorkerId { get; set; }
     }
 }
