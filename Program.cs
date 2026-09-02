@@ -65,6 +65,12 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "KanbanBoard API v1");
         c.InjectJavascript("/swagger-ui/custom.js");
     });
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<KanbanBoardDbContext>();
+        await Seeder.SeedAsync(db);
+    }
 }
 
 app.UseStaticFiles(new StaticFileOptions
